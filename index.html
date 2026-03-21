@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Remi - AI记忆助手</title>
+  <script src="./vendor/react.min.js"></script>
+  <script src="./vendor/react-dom.min.js"></script>
+  <script src="./vendor/babel.min.js"></script>
+  <script src="./vendor/tailwind.js"></script>
+  <script>
+    window.onerror = function(msg, src, line, col, err) {
+      document.getElementById('root').innerHTML =
+        '<div style="padding:20px;color:red;font-family:monospace;white-space:pre-wrap">' +
+        '<b>JS 报错</b><br>' + msg + '<br>行:' + line + ' 列:' + col +
+        (err ? '<br>' + err.stack : '') + '</div>';
+      return false;
+    };
+  </script>
+  <style>
+    /* ====== tailwindcss-animate 兼容动画系统 ====== */
+    .animate-in {
+      --enter-opacity: 1;
+      --enter-scale: 1;
+      --enter-translate-x: 0;
+      --enter-translate-y: 0;
+      --anim-dur: 150ms;
+      animation: tw-enter var(--anim-dur) cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes tw-enter {
+      from {
+        opacity: var(--enter-opacity);
+        transform: translate3d(var(--enter-translate-x), var(--enter-translate-y), 0)
+                   scale3d(var(--enter-scale), var(--enter-scale), 1);
+      }
+    }
+    .fade-in               { --enter-opacity: 0; }
+    .zoom-in-95            { --enter-scale: 0.95; }
+    .slide-in-from-bottom-4 { --enter-translate-y: 1rem; }
+    .slide-in-from-right-4  { --enter-translate-x: 1rem; }
+    .slide-in-from-top-2    { --enter-translate-y: -0.5rem; }
+    .duration-200 { --anim-dur: 200ms; }
+    .duration-300 { --anim-dur: 300ms; }
+    .duration-400 { --anim-dur: 400ms; }
+
+    /* ====== Line-clamp ====== */
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* ====== 全局 Scrollbar 隐藏 ====== */
+    .no-scrollbar::-webkit-scrollbar, .hide-scrollbar::-webkit-scrollbar { display: none; }
+
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    #root { height: 100vh; width: 100vw; overflow: hidden; }
+    * { box-sizing: border-box; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useRef } = React;
+
+    /* ============================================================
+       图标系统 (Lucide 图标 → 内联 SVG React 组件)
+    ============================================================ */
+    function createIcon(svgPaths) {
+      return function LucideIcon({ size = 24, className = '', strokeWidth = 2, style, onClick }) {
+        return (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={size} height={size}
+            viewBox="0 0 24 24"
+            fill="none" stroke="currentColor"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round" strokeLinejoin="round"
+            className={className} style={style}
+            onClick={onClick}
+            dangerouslySetInnerHTML={{ __html: svgPaths }}
+          />
+        );
+      };
+    }
+
+    const Search        = createIcon('<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>');
+    const Book          = createIcon('<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>');
+    const FileText      = createIcon('<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>');
+    const User          = createIcon('<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>');
+    const Mic           = createIcon('<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>');
+    const Upload        = createIcon('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>');
+    const Plus          = createIcon('<path d="M5 12h14"/><path d="M12 5v14"/>');
+    const ChevronDown   = createIcon('<path d="m6 9 6 6 6-6"/>');
+    const Home          = createIcon('<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>');
+    const Layout        = createIcon('<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/>');
+    const PanelRightClose = createIcon('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/><path d="m8 9 3 3-3 3"/>');
+    const Sparkles      = createIcon('<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>');
+    const RefreshCw     = createIcon('<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>');
+    const MessageSquare = createIcon('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>');
+    const ArrowUp       = createIcon('<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>');
+    const X             = createIcon('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>');
+    const Link          = createIcon('<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>');
+    const Grip          = createIcon('<circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/>');
+    const Glasses       = createIcon('<circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M14 15a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M2.5 13 5 7c.7-1.3 1.4-2 3-2"/><path d="M21.5 13 19 7c-.7-1.3-1.5-2-3-2"/>');
+    const ShieldAlert   = createIcon('<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/>');
+    const ChevronLeft   = createIcon('<path d="m15 18-6-6 6-6"/>');
+    const ChevronRight  = createIcon('<path d="m9 18 6-6-6-6"/>');
+    const Bookmark      = createIcon('<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>');
+    const CheckCircle2  = createIcon('<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>');
+    const ListTree      = createIcon('<path d="M21 12h-8"/><path d="M21 6H8"/><path d="M21 18h-8"/><path d="M3 6v4c0 1.1.9 2 2 2h3"/><path d="M3 10v6c0 1.1.9 2 2 2h3"/>');
+    const Clock         = createIcon('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>');
+    const Copy          = createIcon('<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>');
+
+    /* ============================================================
+       App 主组件
+    ============================================================ */
+    function App() {
+      const [currentRoute, setCurrentRoute] = useState('topics');
+      const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
+      const [rightPanelType, setRightPanelType] = useState(null);
+      const [fileDetailTab, setFileDetailTab] = useState('source');
+
+      const [topics, setTopics] = useState([
+        {
+          id: 1, title: 'Remi使用教程', date: '今天',
+          recentActivity: '从建立主题开始使用remi吧',
+          desc: '从 0 开始上手 Remi：创建主题 → 导入文件或开始录音 → 自动转写与总结 → 生成待办与结论 → 一键归档与回看。附常见问题与最佳实践。'
+        }
+      ]);
+
+      const [isNewTopicModalOpen, setIsNewTopicModalOpen] = useState(false);
+      const [uploadState, setUploadState] = useState('idle');
+
+      const [chatMessages, setChatMessages] = useState([]);
+      const [inputValue, setInputValue] = useState('');
+
+      const [pendingActionCount, setPendingActionCount] = useState(0);
+      const [readyCount, setReadyCount] = useState(0);
+      const [topBarState, setTopBarState] = useState('default');
+
+      const [inspirations, setInspirations] = useState([
+        {
+          id: 1, type: 'summary', tagText: '摘要',
+          title: '从建立主题开始使用remi吧',
+          desc: '从 0 开始上手 Remi：创建主题 → 导入文件或开始录音 → 自动转写与总结 → 生成待办与结论...',
+          link: 'Remi使用教程-从建立主题开始使用remi吧',
+          actions: ['使用remi有什么好处？', '如何使用remi？']
+        }
+      ]);
+
+      const getCurrentTimeStr = () => {
+        const now = new Date();
+        return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      };
+
+      const [recentActivities, setRecentActivities] = useState([
+        { id: 1, type: 'document', time: '18:30', tag: '文档', content: 'remi使用案例.txt', topic: '毕业小组讨论-后续分工表' }
+      ]);
+
+      const simulateExternalImport = () => {
+        const files = ['设计规范.pdf', '面试录音.mp3', '需求文档v2.docx', '2026-02-23 19:21记录.md'];
+        const randomFile = files[Math.floor(Math.random() * files.length)];
+        const isAudio = randomFile.endsWith('.mp3');
+        const newActivity = {
+          id: Date.now(), type: isAudio ? 'recording' : 'document',
+          time: getCurrentTimeStr(), tag: isAudio ? '录音' : '文档',
+          content: randomFile, topic: '毕业小组讨论-后续分工表'
+        };
+        setRecentActivities(prev => [newActivity, ...prev]);
+        setPendingActionCount(prev => prev + 1);
+      };
+
+      const simulateExternalChat = () => {
+        const chats = [
+          '"假设你是一名ux的面试官，根据我的作品集内容..."',
+          '"帮我总结一下面试官对我的挑战"'
+        ];
+        const randomChat = chats[Math.floor(Math.random() * chats.length)];
+        const newActivity = {
+          id: Date.now(), type: 'conversation', time: getCurrentTimeStr(),
+          tag: '对话', content: randomChat, topic: '大四实习申请'
+        };
+        setRecentActivities(prev => [newActivity, ...prev]);
+        setPendingActionCount(prev => prev + 1);
+      };
+
+      const handleRefresh = () => {
+        if (pendingActionCount > 0) {
+          setTopBarState('ready');
+          setReadyCount(prev => prev + pendingActionCount);
+
+          const newCards = Array.from({ length: pendingActionCount }).map((_, i) => {
+            const id = Date.now() + i;
+            const cardTypes = ['summary', 'golden-quote', 'mine-clearance', 'main-thread', 'todo'];
+            const selectedType = cardTypes[Math.floor(Math.random() * cardTypes.length)];
+
+            if (selectedType === 'summary') {
+              return {
+                id, type: 'summary', tagText: '摘要',
+                title: '近期访谈记录核心总结',
+                desc: '过去两天内的三场用户访谈中，受访者普遍提到了"信息层级不够清晰"和"深色模式刺眼"两个问题。建议在下个迭代中重点优化视觉对比度。',
+                link: '用户调研访谈录音合集',
+                actions: ['帮我提取所有用户的原话', '整理一份视觉优化建议单']
+              };
+            } else if (selectedType === 'main-thread') {
+              return {
+                id, type: 'main-thread', tagText: '主线提取',
+                title: '两份资料之间，缺一张草图',
+                subtitle: '基于你近期浏览交互基础相关资料，已提取核心关联',
+                quote: '当前的破局点在于：如何将《交互基础》中的理论原则，具体拆解并分配到《后续分工表》的研发任务中。两者之间缺乏一个可视化的"原型草图"作为过渡桥梁。',
+                link: ['毕设小组讨论-后续分工表', '毕设小组讨论-交互设计基础'],
+                actions: ['基于此主线，帮我生成原型图', '结合交互理论，评估目前分工是否合理']
+              };
+            } else if (selectedType === 'todo') {
+              return {
+                id, type: 'todo', tagText: '待办事项',
+                title: '城市空间适老化改造调研', subtitle: '资料收集期结束，进入分析瓶颈。',
+                todos: [
+                  { text: '田野数据采集', assignee: '@小李', time: '明天下午前' },
+                  { text: '案头文献积累', assignee: '@全体成员', time: '2月28日', link: '毕设小组讨论-会议讨论' }
+                ],
+                actions: ['田野数据采集的要点是什么', '帮我基于时间限制做个排期']
+              };
+            } else if (selectedType === 'mine-clearance') {
+              const concepts1 = ['麦克卢汉', '定性研究', '敏捷开发'];
+              const concepts2 = ['波兹曼', '定量研究', '瀑布流'];
+              const rIdx = Math.floor(Math.random() * concepts1.length);
+              const c1 = concepts1[rIdx];
+              const c2 = concepts2[rIdx];
+              return {
+                id, type: 'mine-clearance', tagText: '排雷', title: `"${c1}"和"${c2}"观点概念纠错`,
+                subtitle: `检测到论文中对"${c1}"和"${c2}"的概念有所混淆，需进行修改`,
+                quote: `"……正如${c1}与${c2}所共同指出的那样，这一概念的普及，必然会导致受众群体…"`,
+                link: '毕业小组讨论-后续分工表', actions: ['帮我解释一下这两个核心区别', '结合语境，帮我重写这段话']
+              };
+            } else {
+              const concepts = ['系统可控', '沉浸式体验', '极简设计', '渐进式呈现'];
+              const concept = concepts[Math.floor(Math.random() * concepts.length)];
+              return {
+                id, type: 'golden-quote', tagText: '金句重温', title: '金句重温',
+                subtitle: `检测到近期多次提到"${concept}"相关概念`,
+                quote: `"不要让系统替用户做决定，而是提供${concept.includes('可控') ? '可控的选项' : '自然引导'}。"`,
+                link: '论文开题答辩-交互设计基础', actions: ['解释一下这个观点', `根据这个观点，帮我分析近期资料`]
+              };
+            }
+          });
+          setInspirations(prev => [...newCards, ...prev]);
+          setPendingActionCount(0);
+        }
+      };
+
+      const navigateTo = (route) => {
+        setCurrentRoute(route);
+        if (route === 'topic-detail') {
+          setIsRightPanelOpen(true);
+          setRightPanelType('file-detail');
+          setFileDetailTab('source');
+        } else {
+          setIsRightPanelOpen(false);
+          setRightPanelType(null);
+        }
+      };
+
+      const openFileDetail = () => {
+        setIsRightPanelOpen(true);
+        setRightPanelType('file-detail');
+        setFileDetailTab('source');
+      };
+
+      const openChatbot = (initialQuestion = null) => {
+        setIsRightPanelOpen(true);
+        setRightPanelType('chat');
+        if (initialQuestion && typeof initialQuestion === 'string') {
+          handleSendMessage(initialQuestion);
+        }
+      };
+
+      const handleSendMessage = (text) => {
+        if (!text || typeof text !== 'string' || !text.trim()) return;
+        const newUserMsg = { id: Date.now(), text, sender: 'user' };
+        setChatMessages(prev => [...prev, newUserMsg]);
+        setInputValue('');
+
+        const newActivity = {
+          id: Date.now() + 1, type: 'conversation', time: getCurrentTimeStr(),
+          tag: '对话', content: `"${text}"`, topic: currentRoute === 'topic-detail' ? 'Remi使用教程' : '灵感看板探索'
+        };
+        setRecentActivities(prev => [newActivity, ...prev]);
+        setPendingActionCount(prev => prev + 1);
+
+        setTimeout(() => {
+          let aiResponse = "这是一个模拟的回复。";
+          if (text.includes("好处")) {
+            aiResponse = `用 Remi 的好处，可以用一句话概括：\n\n它不是帮你"存更多"，而是帮你"更快回到当时怎么想的"，并把下一步推到你面前。\n\n**1) 回忆成本更低：更快找到"为什么存它"**\n传统找文件：找到文件 ≠ 想起用途\nRemi：把文件、对话、行动放进同一条脉络里...`;
+          }
+          setChatMessages(prev => [...prev, { id: Date.now(), text: aiResponse, sender: 'ai' }]);
+        }, 600);
+      };
+
+      const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setUploadState('uploading');
+        setTimeout(() => {
+          const autoGeneratedTitle = file.name.replace(/\.[^/.]+$/, "");
+          const newTopic = {
+            id: Date.now(), title: autoGeneratedTitle, date: '刚刚',
+            recentActivity: '新文件导入', desc: `已基于您上传的文件 "${file.name}" 自动分析并为您生成专属主题知识库，现在可以向它提问了。`
+          };
+          setTopics(prev => [newTopic, ...prev]);
+
+          const newActivity = {
+            id: Date.now() + 1, type: file.type.includes('audio') || file.type.includes('video') ? 'recording' : 'document',
+            time: getCurrentTimeStr(), tag: file.type.includes('audio') || file.type.includes('video') ? '录音' : '文档',
+            content: file.name, topic: autoGeneratedTitle
+          };
+          setRecentActivities(prev => [newActivity, ...prev]);
+          setPendingActionCount(prev => prev + 1);
+
+          setUploadState('idle');
+          setIsNewTopicModalOpen(false);
+        }, 1500);
+      };
+
+      /* ── 全局侧边栏 ── */
+      const GlobalSidebar = () => (
+        <div className="w-[220px] bg-white border-r border-gray-100 flex flex-col h-full flex-shrink-0 relative z-10">
+          <div className="p-5 flex items-center space-x-2">
+            <div className="w-7 h-7 bg-purple-600 rounded-lg flex items-center justify-center text-white font-bold">
+              <Sparkles size={16} />
+            </div>
+            <span className="text-lg font-bold tracking-tight">remi</span>
+          </div>
+          <div className="px-4 mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-2 text-gray-400" size={14} />
+              <input type="text" placeholder="全局搜索" className="w-full bg-gray-50 border border-gray-200 rounded-full py-1.5 pl-8 pr-4 text-[13px] focus:outline-none focus:ring-1 focus:ring-purple-500" />
+            </div>
+          </div>
+          <div className="flex-1 px-3 space-y-1">
+            <div className="px-3 py-2 text-sm font-semibold text-gray-900 flex items-center bg-gray-50 rounded-lg mb-2">
+              <Book size={16} className="mr-2 text-gray-500" />
+              知识库
+            </div>
+            <button onClick={() => navigateTo('topics')} className={`w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${currentRoute === 'topics' ? 'bg-purple-50 text-purple-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
+              主题
+            </button>
+            <button onClick={() => navigateTo('inspiration')} className={`w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${currentRoute === 'inspiration' ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
+              灵感看板
+            </button>
+            <button className="w-full flex items-center px-3 py-2 text-sm rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
+              <FileText size={16} className="mr-2" />
+              我的资料
+            </button>
+          </div>
+          <div className="px-3 pb-4">
+            <div className="px-3 py-2 text-[11px] font-bold text-gray-400 flex items-center tracking-wider mb-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-2 animate-pulse"></span>
+              动作模拟器 (测试)
+            </div>
+            <div className="space-y-1">
+              <button onClick={simulateExternalImport} className="w-full flex items-center px-3 py-2 text-sm rounded-lg text-blue-600 hover:bg-blue-50 transition-colors">
+                <Upload size={14} className="mr-2" />
+                模拟导入文件
+              </button>
+              <button onClick={simulateExternalChat} className="w-full flex items-center px-3 py-2 text-sm rounded-lg text-green-600 hover:bg-green-50 transition-colors">
+                <MessageSquare size={14} className="mr-2" />
+                模拟外部对话
+              </button>
+            </div>
+          </div>
+          <div className="p-4 border-t border-gray-100">
+            <div className="flex items-center space-x-3 px-3 py-2 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50">
+              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <User size={16} className="text-gray-500" />
+              </div>
+              <span className="text-sm font-medium">st123456</span>
+            </div>
+          </div>
+        </div>
+      );
+
+      /* ── 主题列表页 ── */
+      const TopicsView = () => (
+        <div className="flex-1 overflow-auto bg-[#fafafa]">
+          <div className="max-w-5xl mx-auto px-10 py-20">
+            <div className="flex flex-col items-center justify-center mb-16 text-center">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">欢迎来到remi，我是你的AI记忆助手</h1>
+              <p className="text-gray-500 text-sm mb-8">国内第一个会主动思考的AI，支持录音实时转写、记录总结、主动建议等功能。开始体验吧～</p>
+              <div className="flex space-x-4">
+                <button className="flex items-center px-6 py-2.5 bg-[#2d2b3b] text-white rounded-full text-sm font-medium hover:bg-gray-800 transition shadow-sm">
+                  <Mic size={16} className="mr-2" />
+                  开始会议记录
+                </button>
+                <button className="flex items-center px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-50 transition shadow-sm">
+                  <Upload size={16} className="mr-2" />
+                  上传文件
+                </button>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900">我的主题</h2>
+                <button onClick={() => setIsNewTopicModalOpen(true)} className="flex items-center px-4 py-2 bg-purple-500 text-white rounded-md text-sm font-medium hover:bg-purple-600 transition shadow-sm">
+                  <Plus size={16} className="mr-1" />
+                  新建主题
+                </button>
+              </div>
+              <div className="flex space-x-6 border-b border-gray-200 mb-6">
+                <button className="pb-3 text-sm font-medium text-purple-600 border-b-2 border-purple-600 bg-purple-50 px-3 rounded-t-md">活跃项目</button>
+                <button className="pb-3 text-sm font-medium text-gray-500 hover:text-gray-700">已归档</button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {topics.map(topic => (
+                  <div key={topic.id} onClick={() => navigateTo('topic-detail')} className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative group">
+                    <div className="flex items-center space-x-3 mb-6">
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600">
+                        <Book size={20} />
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 truncate">{topic.title}</h3>
+                    </div>
+                    <div className="text-xs text-gray-400 mb-2">{topic.date}</div>
+                    <div className="bg-gray-50 rounded-lg p-3 group-hover:bg-purple-50/50 transition-colors">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-gray-800 truncate pr-2">{topic.recentActivity}</span>
+                        <ChevronDown size={14} className="text-gray-400 flex-shrink-0" />
+                      </div>
+                      <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">{topic.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {isNewTopicModalOpen && (
+            <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center" style={{backdropFilter:'blur(4px)'}}>
+              <div className="bg-white rounded-2xl w-[480px] p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+                <button onClick={() => { if (uploadState !== 'uploading') setIsNewTopicModalOpen(false); }} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600" disabled={uploadState === 'uploading'}>
+                  <X size={20} />
+                </button>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">新建主题</h2>
+                <p className="text-sm text-gray-500 mb-6">上传您的研究资料、文档或会议录音，Remi 将自动为您命名并创建专属知识库。</p>
+                <div className="border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 p-10 flex flex-col items-center justify-center text-center relative hover:border-purple-400 hover:bg-purple-50/50 transition-colors cursor-pointer group h-48">
+                  <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileUpload} disabled={uploadState === 'uploading'} />
+                  {uploadState === 'idle' ? (
+                    <>
+                      <div className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 mb-4 group-hover:text-purple-500 group-hover:border-purple-200 shadow-sm transition-colors">
+                        <Upload size={24} />
+                      </div>
+                      <h3 className="text-sm font-semibold text-gray-800 mb-1">点击或拖拽文件到此处上传</h3>
+                      <p className="text-xs text-gray-400">支持 PDF, Word, TXT, MP3 等格式</p>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center space-y-4">
+                      <RefreshCw size={28} className="text-purple-500 animate-spin" />
+                      <div className="text-sm font-medium text-purple-700">正在分析文件并生成主题...</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+
+      /* ── 主题详情页 ── */
+      const TopicDetailView = () => (
+        <div className="flex flex-col h-screen w-full bg-white">
+          <div className="h-14 border-b border-gray-100 flex items-center justify-between px-4 flex-shrink-0 bg-white z-20">
+            <div className="flex items-center space-x-4">
+              <button onClick={() => navigateTo('topics')} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-purple-50 text-purple-600 transition-colors">
+                <Home size={18} />
+              </button>
+              <div className="h-4 w-px bg-gray-200"></div>
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 bg-purple-100 rounded flex items-center justify-center text-purple-600"><Book size={14} /></div>
+                <span className="font-medium text-gray-800 text-sm">Remi使用教程</span>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <button className="flex items-center px-4 py-1.5 bg-[#2d2b3b] text-white rounded-full text-xs font-medium hover:bg-gray-800 transition">
+                <Mic size={14} className="mr-1.5" />开始会议记录
+              </button>
+              <button className="flex items-center px-4 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-full text-xs font-medium hover:bg-gray-50 transition">
+                <Upload size={14} className="mr-1.5" />上传文件
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-1 overflow-hidden bg-gray-50/50">
+            <div className="w-[240px] border-r border-gray-100 bg-white flex flex-col flex-shrink-0">
+              <div className="p-4 flex items-center justify-between">
+                <span className="font-semibold text-gray-800 text-sm">资料</span>
+                <div className="flex space-x-2 text-gray-400">
+                  <Layout size={16} className="cursor-pointer hover:text-gray-600" />
+                  <Search size={16} className="cursor-pointer hover:text-gray-600" />
+                </div>
+              </div>
+              <div className="px-4 pb-4">
+                <button className="w-full flex items-center justify-center px-4 py-2 border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                  <Upload size={14} className="mr-2" />上传文件
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto px-2">
+                <div className="bg-purple-50 rounded-lg p-3 cursor-pointer border border-purple-100/50">
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="text-sm font-medium text-gray-900 truncate">从建立主题开始使用remi吧</span>
+                    <span className="text-xs text-gray-400 flex-shrink-0 ml-2">1月22日</span>
+                  </div>
+                  <div className="flex items-center w-full overflow-hidden">
+                    <span className="bg-purple-200 text-purple-700 px-1.5 py-0.5 rounded text-[10px] mr-1.5 flex-shrink-0 font-medium">录音</span>
+                    <span className="text-xs text-gray-500 truncate">从 0 开始上手 Remi：创建主题 → 导...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1 flex flex-col relative min-w-0 transition-all duration-300">
+              <div className="flex-1 overflow-y-auto p-6 md:p-10 flex flex-col items-center">
+                <div className="w-full max-w-3xl space-y-6">
+                  <div className="bg-[#f5f3ff] border border-purple-100 rounded-2xl p-6 shadow-sm">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <Sparkles size={16} className="text-purple-500" />
+                      <span className="text-sm font-semibold text-purple-700 bg-purple-100 px-2 py-0.5 rounded">摘要</span>
+                    </div>
+                    <p className="text-gray-800 leading-relaxed text-sm mb-6">
+                      从 0 开始上手 Remi：创建主题 → 导入文件或开始录音 → 自动转写与总结 → 生成待办与结论 → 一键归档与回看。附常见问题与最佳实践。
+                    </p>
+                    <div onClick={openFileDetail} className="inline-flex items-center px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-600 cursor-pointer hover:border-purple-300 hover:text-purple-600 transition-colors shadow-sm">
+                      <FileText size={14} className="mr-2 text-gray-400" />
+                      remi使用案例.txt
+                    </div>
+                  </div>
+
+                  {chatMessages.length === 0 && (
+                    <div className="space-y-2">
+                      <button onClick={() => handleSendMessage("使用remi的好处")} className="w-full text-left px-4 py-3 bg-white border border-gray-100 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition shadow-sm">使用remi的好处</button>
+                      <button onClick={() => handleSendMessage("如何使用remi")} className="w-full text-left px-4 py-3 bg-white border border-gray-100 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition shadow-sm">如何使用remi</button>
+                    </div>
+                  )}
+
+                  {chatMessages.length > 0 && (
+                    <div className="space-y-6 w-full pb-4">
+                      {chatMessages.map((msg) => (
+                        <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed ${
+                            msg.sender === 'user' ? 'bg-white border border-gray-200 shadow-sm text-gray-800 rounded-tr-sm' : 'bg-transparent text-gray-800'
+                          }`}>
+                            {msg.text.split('\n').map((line, i) => (
+                              <React.Fragment key={i}>
+                                {line.startsWith('**') ? <strong className="block mt-2 mb-1">{line.replace(/\*\*/g, '')}</strong> : line}
+                                {i < msg.text.split('\n').length - 1 && <br />}
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-6 bg-transparent flex justify-center">
+                <div className="w-full max-w-3xl bg-white border border-gray-200 rounded-2xl p-3 shadow-sm flex flex-col focus-within:border-purple-300 transition-colors">
+                  <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage(inputValue)}
+                    placeholder="询问任何问题"
+                    className="w-full outline-none text-sm text-gray-700 mb-3 bg-transparent"
+                  />
+                  <div className="flex justify-between items-center">
+                    <div className="flex space-x-2">
+                      <button className="flex items-center px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-xs font-medium">
+                        <Link size={14} className="mr-1" />
+                        导设小组讨论
+                      </button>
+                      <button className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-lg text-gray-400 hover:bg-gray-50">
+                        <Layout size={14} />
+                      </button>
+                    </div>
+                    <button onClick={() => handleSendMessage(inputValue)} className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${inputValue.trim() ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-600'}`}>
+                      <ArrowUp size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className={`bg-white border-l border-gray-200 flex flex-col z-10 transition-all duration-300 ease-in-out overflow-hidden flex-shrink-0 ${
+              isRightPanelOpen && rightPanelType === 'file-detail' ? 'w-[340px] opacity-100' : 'w-0 opacity-0 border-none'
+            }`}>
+              <div className="w-[340px] h-full flex flex-col">
+                <div className="h-14 border-b border-gray-100 flex items-center justify-between px-4 flex-shrink-0">
+                  <div className="flex space-x-1 text-[13px] font-medium">
+                    <span onClick={() => setFileDetailTab('source')} className={`px-3 py-1.5 rounded-full cursor-pointer transition-colors ${fileDetailTab === 'source' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}>
+                      源文件
+                    </span>
+                    <span onClick={() => setFileDetailTab('insights')} className={`px-3 py-1.5 rounded-full cursor-pointer transition-colors ${fileDetailTab === 'insights' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}>
+                      相关洞察
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex-1 flex flex-col overflow-hidden relative bg-white">
+                  {fileDetailTab === 'source' ? (
+                    <div className="p-4 flex-1 flex flex-col overflow-hidden animate-in fade-in duration-200">
+                      <div className="relative mb-4">
+                        <Search className="absolute left-3 top-2.5 text-gray-400" size={14} />
+                        <input type="text" placeholder="搜索..." className="w-full bg-gray-50 border border-gray-200 rounded-md py-1.5 pl-8 pr-3 text-xs focus:outline-none" />
+                      </div>
+                      <div className="flex flex-1 gap-4 overflow-hidden">
+                        <div className="w-1/3 overflow-y-auto pr-2 space-y-2">
+                          <div className="bg-gray-100 p-2 rounded border border-gray-200 cursor-pointer">
+                            <div className="flex items-center text-xs text-gray-800 mb-1">
+                              <FileText size={12} className="mr-1 text-gray-500" />
+                              <span className="truncate">remi使用案例.txt</span>
+                            </div>
+                            <div className="text-[10px] text-gray-400 text-right">17.9kb</div>
+                          </div>
+                        </div>
+                        <div className="w-2/3 overflow-y-auto pr-2 text-sm text-gray-700 leading-relaxed border-l border-gray-100 pl-4">
+                          <div className="flex items-center mb-4 text-gray-900 font-medium">
+                            <FileText size={16} className="mr-2 text-gray-500" />
+                            remi使用案例.txt
+                          </div>
+                          <p className="mb-4">Remi 是一款面向会议与学习场景的 AI 记录助手：帮你把"录音"变成"可回看、可检索、可推进"的结构化成果。你只需要做好一件事——开始记录；剩下的转写、整理、总结、行动项与复盘，交给 Remi。</p>
+                          <h4 className="font-semibold mb-2">1. 核心概念：你在 Remi 里主要管理什么？</h4>
+                          <p className="mb-2">在开始之前，先理解 3 个关键词：</p>
+                          <p className="mb-2"><strong>① 主题 (Topic)</strong><br/>你可以把主题理解成一个"项目/课程/面试/小组"的文件夹。每一次会议、录音、资料都可以放到对应主题里，方便后续回看和检索。</p>
+                          <p className="mb-2"><strong>② 记录 (Record)</strong><br/>每一次录音或导入音频后生成的一条记录。记录包含：音频/转写文本/自动总结/重点片段/待办与建议等。</p>
+                          <p className="mb-4"><strong>③ 知识库 (Library)</strong><br/>你在 Remi 的资料沉淀区。可以存放与你的主题相关的文档、链接、材料（例如：需求文档、设计稿链接、参考资料、面试 JD、会议纪要等），用于后续 cross reference。</p>
+                          <h4 className="font-semibold mb-2">2. 新手 3 分钟上手流程</h4>
+                          <p className="mb-2">Step 1 | 创建主题（推荐从"一个真实场景"开始）</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex-1 overflow-y-auto p-5 space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                      <div>
+                        <div className="inline-flex items-center space-x-1.5 bg-[#fef3c7] text-[#d97706] px-2.5 py-1 rounded-lg w-fit mb-3">
+                          <Glasses size={14} />
+                          <span className="text-[12px] font-bold tracking-wide">关键点</span>
+                        </div>
+                        <h4 className="text-[16px] font-bold text-gray-900 mb-1.5">明确需求边界</h4>
+                        <p className="text-[12px] text-gray-500 mb-4">检测到近期多次提到"系统可控"相关概念</p>
+                        <div className="bg-[#f8f9fa] rounded-2xl p-4 mb-4 border border-gray-100/60">
+                          <ul className="list-disc pl-4 text-[13px] text-gray-800 leading-loose space-y-2">
+                            <li>最初引用的法律条款有误，实际应依据《个人信息保护法》，必须在产品中加入"用户明确同意"的机制</li>
+                            <li>市场最初建议只上线注册与浏览，但讨论后明确：首发版本需包含注册、浏览、评论和分享功能。</li>
+                          </ul>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <button className="text-gray-400 hover:text-gray-600 transition-colors"><Copy size={18} /></button>
+                          <button onClick={() => openChatbot("关于明确需求边界，帮我展开讲讲")} className="flex items-center px-4 py-2 bg-[#b886fb] text-white rounded-xl text-[13px] font-bold hover:bg-[#936af5] transition-colors shadow-sm">
+                            <MessageSquare size={14} className="mr-1.5" /> 提问
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="pt-8 border-t border-gray-100">
+                        <div className="inline-flex items-center space-x-1.5 bg-[#ffe4e6] text-[#e11d48] px-2.5 py-1 rounded-lg w-fit mb-3">
+                          <ShieldAlert size={14} />
+                          <span className="text-[12px] font-bold tracking-wide">排雷</span>
+                        </div>
+                        <h4 className="text-[16px] font-bold text-gray-900 mb-1.5">"麦克卢汉"和"波兹曼"观点概念纠错</h4>
+                        <p className="text-[12px] text-gray-500 mb-4">检测到论文中对"麦克卢汉"和"波兹曼"的概念有所混淆，需进行修改</p>
+                        <div className="bg-[#f8f9fa] rounded-2xl p-4 mb-4 border border-gray-100/60">
+                          <p className="text-[13px] text-gray-800 leading-loose">
+                            "正如麦克卢汉与波兹曼所共同指出的那样，电视这一电子媒介的普及，必然会导致受众群体走向'娱乐至死'的深渊。如果对'娱乐至死'的理念不够..."
+                          </p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <button className="text-gray-400 hover:text-gray-600 transition-colors"><Copy size={18} /></button>
+                          <button onClick={() => openChatbot("帮我解释一下这两个概念的核心区别")} className="flex items-center px-4 py-2 bg-[#b886fb] text-white rounded-xl text-[13px] font-bold hover:bg-[#936af5] transition-colors shadow-sm">
+                            <MessageSquare size={14} className="mr-1.5" /> 提问
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="pt-8 border-t border-gray-100 pb-4">
+                        <div className="inline-flex items-center space-x-1.5 bg-[#dcfce7] text-[#16a34a] px-2.5 py-1 rounded-lg w-fit mb-3">
+                          <CheckCircle2 size={14} />
+                          <span className="text-[12px] font-bold tracking-wide">待办事项</span>
+                        </div>
+                        <h4 className="text-[16px] font-bold text-gray-900 mb-1.5">研发管线与效率对齐</h4>
+                        <p className="text-[12px] text-gray-500 mb-4">资料收集期结束，进入分析瓶颈。</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+
+      /* ── 灵感看板 ── */
+      const InspirationView = () => {
+        const scrollRef = useRef(null);
+        const [viewMode, setViewMode] = useState('board');
+        const [draggedItemId, setDraggedItemId] = useState(null);
+        const [isOverTopBar, setIsOverTopBar] = useState(false);
+        const [droppedItems, setDroppedItems] = useState([]);
+        const [promptInput, setPromptInput] = useState('');
+        const [selectedActionTags, setSelectedActionTags] = useState([]);
+        const [currentAggregation, setCurrentAggregation] = useState(null);
+
+        const scroll = (direction) => {
+          if (scrollRef.current) {
+            scrollRef.current.scrollBy({ left: direction === 'left' ? -280 : 280, behavior: 'smooth' });
+          }
+        };
+
+        const handleDragStart = (e, activity) => {
+          setDraggedItemId(activity.id);
+          e.dataTransfer.setData('text/plain', String(activity.id));
+          e.dataTransfer.effectAllowed = 'copyMove';
+        };
+
+        const handleDragEnd = () => {
+          setDraggedItemId(null);
+          setIsOverTopBar(false);
+        };
+
+        const handleDragOverTopBar = (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+          if (!isOverTopBar) setIsOverTopBar(true);
+        };
+
+        const handleDragLeaveTopBar = () => setIsOverTopBar(false);
+
+        const handleDropTopBar = (e) => {
+          e.preventDefault();
+          setIsOverTopBar(false);
+          if (draggedItemId) {
+            const item = recentActivities.find(a => String(a.id) === String(draggedItemId));
+            if (item && !droppedItems.find(i => String(i.id) === String(item.id))) {
+              setDroppedItems(prev => [...prev, item]);
+            }
+          }
+          setDraggedItemId(null);
+        };
+
+        const removeDroppedItem = (id) => {
+          setDroppedItems(prev => prev.filter(item => item.id !== id));
+          if (droppedItems.length <= 1) setSelectedActionTags([]);
+        };
+
+        const toggleActionTag = (tagId) => {
+          setSelectedActionTags(prev => prev.includes(tagId) ? prev.filter(t => t !== tagId) : [...prev, tagId]);
+        };
+
+        const submitPrompt = () => {
+          if (droppedItems.length === 0) return;
+
+          if (selectedActionTags.length > 0) {
+            const generatedCards = [];
+            if (selectedActionTags.includes('main-thread')) {
+              generatedCards.push({
+                id: 'prev-main', type: 'main-thread', tagText: '主线提取',
+                title: '两份资料之间，缺一张草图',
+                subtitle: '基于你近期浏览交互基础相关资料，已提取核心关联',
+                quote: '当前的破局点在于：如何将《交互基础》中的理论原则，具体拆解并分配到《后续分工表》的研发任务中。两者之间缺乏一个可视化的"原型草图"作为过渡桥梁。',
+                link: ['毕设小组讨论-后续分工表', '毕设小组讨论-交互设计基础'],
+                actions: ['基于此主线，帮我生成原型图', '结合交互理论，评估目前分工是否合理']
+              });
+            }
+            if (selectedActionTags.includes('golden-quote')) {
+              generatedCards.push({
+                id: 'prev-golden', type: 'golden-quote', tagText: '金句重温',
+                title: '金句重温', subtitle: '检测到近期多次提到"系统可控"相关概念',
+                quote: '"不要让系统替用户做决定，而是提供可控的选项。"',
+                link: '论文开题答辩-交互设计基础',
+                actions: ['解释一下这个观点', '根据这个观点，帮我分析近期资料']
+              });
+            }
+            if (selectedActionTags.includes('mine-clearance')) {
+              generatedCards.push({
+                id: 'prev-mine', type: 'mine-clearance', tagText: '排雷',
+                title: '"麦克卢汉"和"波兹曼"观点概念纠错',
+                subtitle: '检测到论文中对"麦克卢汉"和"波兹曼"的概念有所混淆，需进行修改',
+                quote: '"……正如麦克卢汉与波兹曼所共同指出的那样，电视这一电子媒介的普及，必然会导致受众群体…"',
+                link: '毕业小组讨论-后续分工表',
+                actions: ['帮我解释一下这两个核心区别', '结合语境，帮我重写这段话']
+              });
+            }
+            generatedCards.push({
+              id: 'prev-todo', type: 'todo', tagText: '待办事项',
+              title: '城市空间适老化改造调研', subtitle: '资料收集期结束，进入分析瓶颈。',
+              todos: [
+                { text: '田野数据采集', assignee: '@小李', time: '明天下午前' },
+                { text: '案头文献积累', assignee: '@全体成员', time: '2月28日', link: '毕设小组讨论-会议讨论' }
+              ],
+              actions: ['田野数据采集的要点是什么', '帮我基于时间限制做个排期']
+            });
+
+            setCurrentAggregation({
+              title: '分工合理性检测',
+              desc: '初步检查：分工覆盖了核心产出，但可执行性一般。当前任务里约 40% 仍停留在"做调研/出方案"的泛描述，缺少可验收的交付物；2 条关键任务存在隐性依赖（需要先完成某材料/某决策才能推进）；另外 1 位成员处在 2 个关键节点上，出现"单点瓶颈"。建议把任务拆成可验收卡片，并补齐依赖与回收口。',
+              sources: droppedItems,
+              cards: generatedCards
+            });
+            setViewMode('preview');
+          } else {
+            const fileNames = droppedItems.map(i => `[${i.content}]`).join('、');
+            const finalPrompt = promptInput.trim() ? `关于 ${fileNames}，${promptInput}` : `帮我总结一下 ${fileNames} 的重点。`;
+            openChatbot(finalPrompt);
+            setPromptInput('');
+            setDroppedItems([]);
+          }
+        };
+
+        const handleSaveAggregation = () => {
+          if (!currentAggregation) return;
+          const newAggregationCard = {
+            id: Date.now(), type: 'aggregation',
+            title: currentAggregation.title,
+            desc: currentAggregation.desc,
+            sources: currentAggregation.sources,
+            cards: currentAggregation.cards
+          };
+          setInspirations(prev => [newAggregationCard, ...prev]);
+          setViewMode('board');
+          setDroppedItems([]);
+          setSelectedActionTags([]);
+          setPromptInput('');
+          setCurrentAggregation(null);
+        };
+
+        const viewAggregationDetail = (aggregationCard) => {
+          setCurrentAggregation(aggregationCard);
+          setViewMode('detail');
+        };
+
+        const renderCard = (item) => {
+          if (item.type === 'aggregation') {
+            return (
+              <div key={item.id} onClick={() => viewAggregationDetail(item)} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 cursor-pointer hover:shadow-md hover:border-purple-200 transition-all group col-span-1 animate-in fade-in zoom-in-95 duration-300">
+                <div className="flex flex-col h-full">
+                  <div className="flex items-center space-x-2 text-[#6366f1] mb-5">
+                    <div className="bg-[#eef2ff] p-1.5 rounded-lg"><Sparkles size={14} /></div>
+                    <span className="text-[13px] font-bold tracking-wide">AI 灵感聚合</span>
+                  </div>
+                  {item.sources && item.sources.length > 0 && (
+                    <div className="bg-[#fafafa] rounded-xl p-3.5 mb-5 border border-gray-100 group-hover:bg-white transition-colors">
+                      <div className="flex items-center text-[11px] text-gray-400 mb-2.5">
+                        <Grip size={12} className="mr-1.5" />
+                        <span className="mr-2">{item.sources[0].time}</span>
+                        <span className="bg-gray-200/60 px-1.5 py-0.5 rounded text-gray-500 font-medium">{item.sources[0].tag}</span>
+                      </div>
+                      <div className="flex items-center text-[13px] font-medium text-gray-800 mb-2.5">
+                        {item.sources[0].type === 'document' ? <FileText size={14} className="mr-2 text-gray-400 flex-shrink-0" /> : <Mic size={14} className="mr-2 text-gray-400 flex-shrink-0" />}
+                        <span className="truncate">{item.sources[0].content}</span>
+                      </div>
+                      {item.sources.length > 1 && (
+                        <div className="text-[11px] text-gray-400 mb-2.5 font-medium ml-5">以及另外 {item.sources.length - 1} 个内容...</div>
+                      )}
+                      <div className="inline-flex items-center text-[11px] text-purple-600 bg-[#f5f3ff] rounded-md px-2.5 py-1.5 w-full mt-1 font-medium">
+                        <Link size={12} className="mr-1.5 flex-shrink-0" />
+                        <span className="truncate">{item.sources[0].topic}</span>
+                      </div>
+                    </div>
+                  )}
+                  <h4 className="text-[16px] font-bold text-gray-900 mb-2.5">{item.title}</h4>
+                  <p className="text-[13px] text-gray-500 leading-relaxed mb-6 line-clamp-3">{item.desc}</p>
+                  <div className="mt-auto w-full text-center px-4 py-2.5 bg-gray-50 group-hover:bg-purple-50 group-hover:text-purple-600 rounded-xl text-[13px] text-gray-600 transition-colors font-medium">
+                    点击查看完整报告
+                  </div>
+                </div>
+              </div>
+            );
+          }
+          if (item.type === 'summary') {
+            return (
+              <div key={item.id} className="bg-[#faf8ff] rounded-2xl border border-[#e9d5ff]/60 shadow-sm p-5 animate-in fade-in zoom-in-95 duration-300">
+                <div className="inline-flex items-center space-x-1.5 bg-[#f3e8ff] text-[#9333ea] px-2.5 py-1 rounded-lg w-fit mb-4">
+                  <Book size={14} />
+                  <span className="text-[12px] font-bold tracking-wide">{item.tagText}</span>
+                </div>
+                <h4 className="text-[15px] font-bold text-gray-900 mb-2">{item.title}</h4>
+                <p className="text-[13px] text-gray-600 leading-relaxed mb-4">{item.desc}</p>
+                <div className="inline-flex items-center px-2 py-1.5 bg-[#f3e8ff] text-[#9333ea] rounded-md text-[11px] cursor-pointer hover:bg-purple-200 transition mb-5 w-full font-medium">
+                  <Link size={12} className="mr-1.5 flex-shrink-0" />
+                  <span className="truncate">{item.link}</span>
+                </div>
+                <div className="space-y-2">
+                  {item.actions.map((act, i) => (
+                    <button key={i} onClick={() => openChatbot(act)} className="w-full text-left px-4 py-2.5 bg-white border border-gray-100 rounded-xl text-[12px] text-gray-600 hover:bg-gray-50 transition shadow-sm font-medium">
+                      {act}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+          if (item.type === 'golden-quote') {
+            return (
+              <div key={item.id} className="bg-[#fffdf0] rounded-2xl border border-[#fef08a]/60 shadow-sm p-5 animate-in fade-in zoom-in-95 duration-300">
+                <div className="inline-flex items-center space-x-1.5 bg-[#fef3c7] text-[#d97706] px-2.5 py-1 rounded-lg w-fit mb-4">
+                  <Glasses size={14} />
+                  <span className="text-[12px] font-bold tracking-wide">{item.tagText}</span>
+                </div>
+                <h4 className="text-[15px] font-bold text-gray-900 mb-1">{item.title}</h4>
+                <p className="text-[12px] text-gray-500 mb-4">{item.subtitle}</p>
+                <div className="bg-white border border-[#fef08a]/40 rounded-xl p-4 mb-4">
+                  <p className="text-[13px] text-gray-800 leading-relaxed mb-3 font-medium">{item.quote}</p>
+                  <div className="inline-flex items-center px-2 py-1.5 bg-[#f5f3ff] text-purple-600 rounded-md text-[11px] cursor-pointer hover:bg-purple-100 transition w-full font-medium">
+                    <Link size={12} className="mr-1.5 flex-shrink-0" />
+                    <span className="truncate">{item.link}</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {item.actions.map((act, i) => (
+                    <button key={i} onClick={() => openChatbot(act)} className="w-full text-left px-4 py-2.5 bg-white border border-gray-100 rounded-xl text-[12px] text-gray-600 hover:bg-gray-50 transition shadow-sm font-medium">
+                      {act}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+          if (item.type === 'mine-clearance') {
+            return (
+              <div key={item.id} className="bg-[#fff0f2] rounded-2xl border border-[#fecdd3]/60 shadow-sm p-5 animate-in fade-in zoom-in-95 duration-300">
+                <div className="inline-flex items-center space-x-1.5 bg-[#ffe4e6] text-[#e11d48] px-2.5 py-1 rounded-lg w-fit mb-4">
+                  <ShieldAlert size={14} />
+                  <span className="text-[12px] font-bold tracking-wide">{item.tagText}</span>
+                </div>
+                <h4 className="text-[15px] font-bold text-gray-900 mb-1 leading-snug">{item.title}</h4>
+                <p className="text-[12px] text-gray-500 mb-4">{item.subtitle}</p>
+                <div className="bg-white border border-[#fecdd3]/40 rounded-xl p-4 mb-4">
+                  <p className="text-[13px] text-gray-800 leading-relaxed mb-3 font-medium">{item.quote}</p>
+                  <div className="inline-flex items-center px-2 py-1.5 bg-[#f5f3ff] text-purple-600 rounded-md text-[11px] cursor-pointer hover:bg-purple-100 transition w-full font-medium">
+                    <Link size={12} className="mr-1.5 flex-shrink-0" />
+                    <span className="truncate">{item.link}</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {item.actions.map((act, i) => (
+                    <button key={i} onClick={() => openChatbot(act)} className="w-full text-left px-4 py-2.5 bg-white border border-gray-100 rounded-xl text-[12px] text-gray-600 hover:bg-gray-50 transition shadow-sm font-medium">
+                      {act}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+          if (item.type === 'main-thread') {
+            return (
+              <div key={item.id} className="bg-[#f0f9ff] rounded-2xl border border-[#bae6fd]/60 shadow-sm p-5 animate-in fade-in zoom-in-95 duration-300">
+                <div className="inline-flex items-center space-x-1.5 bg-[#e0f2fe] text-[#0284c7] px-2.5 py-1 rounded-lg w-fit mb-4">
+                  <ListTree size={14} />
+                  <span className="text-[12px] font-bold tracking-wide">{item.tagText}</span>
+                </div>
+                <h4 className="text-[16px] font-bold text-gray-900 mb-2 leading-snug">{item.title}</h4>
+                <p className="text-[12px] text-gray-500 mb-4">{item.subtitle}</p>
+                <div className="bg-white border border-[#bae6fd]/40 rounded-xl p-4 mb-4">
+                  <p className="text-[13px] text-gray-800 leading-relaxed mb-4 font-medium">{item.quote}</p>
+                  <div className="flex flex-col gap-2 w-full">
+                    {Array.isArray(item.link) ? item.link.map((l, i) => (
+                      <div key={i} className="inline-flex items-center px-3 py-2 bg-[#f5f3ff] text-purple-600 rounded-lg text-[12px] cursor-pointer hover:bg-purple-100 transition w-full font-medium">
+                        <Link size={12} className="mr-2 flex-shrink-0" />
+                        <span className="truncate">{l}</span>
+                      </div>
+                    )) : (
+                      <div className="inline-flex items-center px-3 py-2 bg-[#f5f3ff] text-purple-600 rounded-lg text-[12px] cursor-pointer hover:bg-purple-100 transition w-full font-medium">
+                        <Link size={12} className="mr-2 flex-shrink-0" />
+                        <span className="truncate">{item.link}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {item.actions.map((act, i) => (
+                    <button key={i} onClick={() => openChatbot(act)} className="w-full text-left px-4 py-2.5 bg-white border border-gray-100 rounded-xl text-[12px] text-gray-600 hover:bg-gray-50 transition shadow-sm font-medium">
+                      {act}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+          if (item.type === 'todo') {
+            return (
+              <div key={item.id} className="bg-[#f0fdf4] rounded-2xl border border-[#bbf7d0]/60 shadow-sm p-5 animate-in fade-in zoom-in-95 duration-300">
+                <div className="inline-flex items-center space-x-1.5 bg-[#dcfce7] text-[#16a34a] px-2.5 py-1 rounded-lg w-fit mb-4">
+                  <CheckCircle2 size={14} />
+                  <span className="text-[12px] font-bold tracking-wide">{item.tagText}</span>
+                </div>
+                <h4 className="text-[15px] font-bold text-gray-900 mb-1 leading-snug">{item.title}</h4>
+                <p className="text-[12px] text-gray-500 mb-4">{item.subtitle}</p>
+                <div className="bg-white border border-[#bbf7d0]/40 rounded-xl p-4 mb-4">
+                  {item.todos && item.todos.map((todo, i) => (
+                    <div key={i} className={`${i !== item.todos.length - 1 ? 'border-b border-gray-100 pb-3 mb-3' : ''}`}>
+                      <div className="text-[14px] text-gray-800 font-medium mb-1.5">{todo.text}</div>
+                      <div className="flex items-center text-[12px] text-gray-500 mb-1">
+                        <span className="mr-2">{todo.assignee}</span>
+                        <Clock size={11} className="mr-1 opacity-70" />
+                        <span>{todo.time}</span>
+                      </div>
+                      {todo.link && (
+                        <div className="inline-flex items-center px-2 py-1.5 bg-[#f5f3ff] text-purple-600 rounded-md text-[11px] cursor-pointer hover:bg-purple-100 transition w-full mt-2 font-medium">
+                          <Link size={12} className="mr-1.5 flex-shrink-0" />
+                          <span className="truncate">{todo.link}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {item.actions && item.actions.length > 0 && (
+                  <div className="space-y-2">
+                    {item.actions.map((act, i) => (
+                      <button key={i} onClick={() => openChatbot(act)} className="w-full text-left px-4 py-2.5 bg-white border border-gray-100 rounded-xl text-[12px] text-gray-600 hover:bg-gray-50 transition shadow-sm font-medium">
+                        {act}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          }
+          return null;
+        };
+
+        return (
+          <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#fafafa]">
+            <div className="flex-1 overflow-y-auto p-6 relative flex justify-center">
+              <div className="flex w-full transition-all duration-300" style={{ maxWidth: isRightPanelOpen && rightPanelType === 'chat' ? '100%' : '1200px' }}>
+
+                {/* 左侧主区域 */}
+                <div className="flex-1 min-w-0 transition-all duration-300 flex flex-col">
+
+                  {/* 顶栏 */}
+                  <div className="mb-8 w-full transition-all">
+                    {viewMode === 'detail' ? (
+                      <div className="flex items-center justify-between bg-white rounded-full border border-gray-200 shadow-sm p-2 w-full">
+                        <button onClick={() => { setViewMode('board'); setCurrentAggregation(null); }} className="flex items-center px-4 py-1.5 text-[13px] text-gray-600 hover:bg-gray-100 rounded-full transition font-medium">
+                          <ChevronLeft size={16} className="mr-1" />返回灵感看板
+                        </button>
+                        <div className="flex items-center px-5 py-1.5 bg-gray-50 border border-gray-200 text-gray-400 rounded-full text-[12px] font-medium mr-2">
+                          <Search size={13} className="mr-1.5" />已聚焦至该聚合报告
+                        </div>
+                      </div>
+                    ) : draggedItemId ? (
+                      <div
+                        onDragOver={handleDragOverTopBar}
+                        onDragLeave={handleDragLeaveTopBar}
+                        onDrop={handleDropTopBar}
+                        className={`w-full h-[52px] rounded-full border-2 border-dashed flex items-center justify-center transition-all duration-200 ${
+                          isOverTopBar ? 'border-[#8b5cf6] bg-purple-50 shadow-inner' : 'border-[#d8b4fe] bg-[#fcfaff]'
+                        }`}
+                      >
+                        <Search size={20} className="text-[#a882ff] mr-3" />
+                        <span className="text-[14px] font-bold text-[#a882ff] tracking-wide">让remi为你探索灵感</span>
+                      </div>
+                    ) : droppedItems.length > 0 ? (
+                      <div className="animate-in fade-in zoom-in-95 duration-200">
+                        <div className={`bg-white rounded-full border shadow-sm p-1.5 flex items-center justify-between w-full h-[52px] transition-all ${
+                          viewMode === 'preview' ? 'border-purple-200 bg-purple-50/20' : 'border-gray-200 focus-within:border-purple-300'
+                        }`}>
+                          <div className="flex items-center flex-1 overflow-x-auto pl-3 gap-2 no-scrollbar">
+                            <Search size={20} className="text-[#a882ff] mr-2 flex-shrink-0" />
+                            {droppedItems.map(item => (
+                              <div key={item.id} className="bg-gray-100/80 rounded-lg px-3 py-1.5 flex items-center max-w-[160px] flex-shrink-0 relative group">
+                                {item.type === 'document' ? <FileText size={13} className="mr-2 text-gray-500 flex-shrink-0" /> : <Mic size={13} className="mr-2 text-gray-500 flex-shrink-0" />}
+                                <span className="text-[12px] font-medium text-gray-700 truncate">{item.content}</span>
+                                {viewMode === 'board' && (
+                                  <button onClick={() => removeDroppedItem(item.id)} className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm hidden group-hover:block border border-gray-200 text-gray-400 hover:text-red-500">
+                                    <X size={10} />
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                            <input
+                              type="text"
+                              value={promptInput}
+                              onChange={(e) => setPromptInput(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && submitPrompt()}
+                              placeholder={viewMode === 'preview' ? "正在预览灵感聚合..." : "继续补充指令，或直接推荐..."}
+                              className="flex-1 min-w-[150px] bg-transparent outline-none text-[13px] text-gray-700 placeholder-gray-400 ml-1"
+                              disabled={viewMode === 'preview'}
+                              autoFocus={viewMode !== 'preview'}
+                            />
+                          </div>
+                          {viewMode === 'board' && (
+                            <div className="flex items-center space-x-3 pr-2 flex-shrink-0 pl-2">
+                              <button onClick={submitPrompt} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#a882ff] text-white hover:bg-[#936af5] transition shadow-sm">
+                                <ArrowUp size={16} />
+                              </button>
+                              <div className="w-px h-5 bg-gray-200"></div>
+                              <button onClick={submitPrompt} className="flex items-center px-4 py-1.5 bg-gray-50 text-gray-700 rounded-lg text-[12px] font-bold hover:bg-gray-100 transition border border-gray-200">
+                                <Sparkles size={13} className="mr-1.5" /> 推荐
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        {viewMode === 'board' && (
+                          <div className="flex flex-wrap gap-3 mt-4 ml-12 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <button onClick={() => toggleActionTag('main-thread')} className={`flex items-center px-4 py-2 rounded-xl text-[12px] font-bold transition-all ${selectedActionTags.includes('main-thread') ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm border' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
+                              <ListTree size={13} className="mr-1.5" /> 主线提取
+                            </button>
+                            <button onClick={() => toggleActionTag('golden-quote')} className={`flex items-center px-4 py-2 rounded-xl text-[12px] font-bold transition-all ${selectedActionTags.includes('golden-quote') ? 'bg-yellow-50 border-yellow-200 text-yellow-600 shadow-sm border' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
+                              <Glasses size={13} className="mr-1.5" /> 金句重温
+                            </button>
+                            <button onClick={() => toggleActionTag('mine-clearance')} className={`flex items-center px-4 py-2 rounded-xl text-[12px] font-bold transition-all ${selectedActionTags.includes('mine-clearance') ? 'bg-red-50 border-red-200 text-red-600 shadow-sm border' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
+                              <ShieldAlert size={13} className="mr-1.5" /> 排雷
+                            </button>
+                            <button onClick={() => setPromptInput("解释一下这个观点")} className="flex items-center px-4 py-2 rounded-xl text-[12px] font-bold transition-colors bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
+                              解释一下这个观点
+                            </button>
+                            <button onClick={() => setPromptInput("如何使用remi")} className="flex items-center px-4 py-2 rounded-xl text-[12px] font-bold transition-colors bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
+                              如何使用remi
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="bg-white rounded-full border border-gray-200 shadow-sm p-1.5 flex items-center justify-between w-full h-[52px] transition-all">
+                        <div className="flex items-center text-gray-500 px-4 flex-1 min-w-0">
+                          <Sparkles size={18} className="text-[#8b5cf6] mr-3 flex-shrink-0" />
+                          {topBarState === 'default' ? (
+                            <span className="text-[13px] truncate">导入文件，remi会为你搜索灵感</span>
+                          ) : (
+                            <div className="text-[14px] font-medium text-gray-700 flex items-center truncate">
+                              过去3小时里，remi已为您预备 <span className="bg-[#f3e8ff] text-[#9333ea] px-2.5 py-0.5 rounded-md font-bold text-[14px] mx-2 shadow-sm">{readyCount}</span> 个灵感
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex space-x-2 pr-2 flex-shrink-0 relative">
+                          <button onClick={handleRefresh} className="flex items-center px-4 py-1.5 text-[12px] text-gray-600 hover:bg-gray-100 rounded-full transition font-medium relative">
+                            <RefreshCw size={13} className="mr-1.5" />刷新
+                            {pendingActionCount > 0 && <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>}
+                          </button>
+                          <button className="flex items-center px-5 py-1.5 bg-gray-50 border border-gray-200 text-gray-700 rounded-full text-[12px] font-bold hover:bg-gray-100 transition">
+                            <Search size={13} className="mr-1.5" />搜索
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 近期动态 (画板模式) */}
+                  {viewMode === 'board' && (
+                    <div className="mb-10 w-full relative">
+                      <div className="flex justify-between items-end mb-4">
+                        <div>
+                          <h3 className="text-[13px] font-semibold text-gray-900 mb-1">近期动态</h3>
+                          <p className="text-[11px] text-gray-400">展示过去 72 小时的捕获记录 (长按卡片可拖拽至顶栏进行聚合)</p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button onClick={() => scroll('left')} className="w-7 h-7 flex items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-purple-600 transition shadow-sm">
+                            <ChevronLeft size={14} />
+                          </button>
+                          <button onClick={() => scroll('right')} className="w-7 h-7 flex items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-purple-600 transition shadow-sm">
+                            <ChevronRight size={14} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div
+                        ref={scrollRef}
+                        className="flex gap-4 overflow-x-auto scroll-smooth snap-x pb-4 pt-1 px-1 -mx-1 no-scrollbar"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                      >
+                        {recentActivities.map(activity => (
+                          <div
+                            key={activity.id}
+                            draggable="true"
+                            onDragStart={(e) => handleDragStart(e, activity)}
+                            onDragEnd={handleDragEnd}
+                            className="bg-white rounded-xl shadow-sm p-4 flex flex-col animate-in fade-in zoom-in-95 duration-300 h-[140px] w-[280px] min-w-[280px] flex-shrink-0 snap-start cursor-grab hover:border-[#a882ff] border border-gray-200 transition-all hover:shadow-md"
+                          >
+                            <div className="flex items-center text-[12px] text-gray-500 mb-3">
+                              <Grip size={13} className="mr-1.5 text-gray-400" />
+                              <span className="mr-2 text-gray-700">{activity.time}</span>
+                              <span className="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] text-gray-500 font-medium">{activity.tag}</span>
+                            </div>
+
+                            {activity.type === 'document' || activity.type === 'recording' ? (
+                              <div className="rounded-lg p-2.5 mb-2 flex items-center text-[12px] font-medium border flex-1 bg-gray-50 border-gray-100 text-gray-700">
+                                {activity.type === 'document' ? <FileText size={15} className="mr-2 text-gray-400 flex-shrink-0" /> : <Mic size={15} className="mr-2 text-gray-400 flex-shrink-0" />}
+                                <span className="truncate">{activity.content}</span>
+                              </div>
+                            ) : (
+                              <div className="text-[13px] leading-relaxed mb-2 flex-1 line-clamp-3 italic text-gray-800">
+                                {activity.content}
+                              </div>
+                            )}
+
+                            <div className="mt-auto">
+                              <div className="inline-flex items-center text-[11px] rounded-lg px-2.5 py-1.5 w-full transition-colors text-purple-600 bg-[#faf5ff] hover:bg-purple-100 font-medium">
+                                <Link size={12} className="mr-1.5 flex-shrink-0" />
+                                <span className="truncate">{activity.topic}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* AI 聚合预览 / 详情 / 正常画板 */}
+                  {viewMode === 'preview' || viewMode === 'detail' ? (
+                    <div className="animate-in slide-in-from-bottom-4 fade-in duration-400 pb-10 mt-6 max-w-4xl mx-auto w-full">
+                      <div className="bg-[#f8f9fe] rounded-3xl p-8 border border-[#e2e8f0] shadow-sm relative mb-10">
+                        <div className="flex justify-between items-start mb-6">
+                          <div className="flex items-center text-[#8b5cf6] font-bold text-[14px] tracking-wide">
+                            <Sparkles size={18} className="mr-2" /> AI 灵感聚合
+                          </div>
+                          {viewMode === 'preview' && (
+                            <div className="flex items-center space-x-3">
+                              <button onClick={() => { setViewMode('board'); setDroppedItems([]); setSelectedActionTags([]); setPromptInput(''); setCurrentAggregation(null); }} className="text-gray-500 hover:bg-gray-200/50 hover:text-gray-800 px-4 py-2.5 rounded-xl text-[13px] font-bold transition-colors">
+                                忽略
+                              </button>
+                              <button onClick={handleSaveAggregation} className="bg-[#6366f1] hover:bg-[#4f46e5] text-white px-5 py-2.5 rounded-xl text-[13px] font-bold flex items-center transition-colors shadow-md">
+                                <Bookmark size={14} className="mr-2" /> 保存为灵感聚合
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        <h2 className="text-[22px] font-bold text-gray-900 mb-5">{currentAggregation?.title}</h2>
+                        <p className="text-gray-600 text-[14px] leading-loose">{currentAggregation?.desc}</p>
+                      </div>
+
+                      <div className="flex items-center justify-center my-10 relative">
+                        <div className="absolute w-full h-px bg-gray-200"></div>
+                        <span className="bg-[#fafafa] px-5 text-[13px] text-gray-400 relative z-10">
+                          以下是基于选定内容的 <span className="text-[#8b5cf6] font-bold tracking-wide">灵感流</span>
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+                        {currentAggregation?.cards?.map((item, index) => (
+                          <React.Fragment key={index}>
+                            {renderCard(item)}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex justify-between items-end mb-5">
+                        <div>
+                          <h3 className="text-[13px] font-semibold text-gray-900 mb-1">灵感看板</h3>
+                          <p className="text-[11px] text-gray-400">展示AI为你提取的灵感</p>
+                        </div>
+                        <button onClick={() => openChatbot()} className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-full text-[12px] font-bold text-gray-600 hover:bg-gray-50 shadow-sm transition">
+                          <Sparkles size={14} className="mr-1.5 text-gray-500" />
+                          问问REMI
+                        </button>
+                      </div>
+                      <div className="grid gap-4 items-start w-full" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
+                        {inspirations.map((item, index) => (
+                          <React.Fragment key={index}>
+                            {renderCard(item)}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 右侧聊天面板 */}
+                <div className={`bg-white border border-gray-200 rounded-2xl shadow-2xl flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
+                  isRightPanelOpen && rightPanelType === 'chat' ? 'w-[340px] ml-6 opacity-100' : 'w-0 ml-0 opacity-0 border-none'
+                }`}>
+                  <div className="w-[340px] h-full flex flex-col">
+                    <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Sparkles size={18} className="text-gray-700" />
+                        <span className="font-bold text-gray-900">问问REMI</span>
+                      </div>
+                      <div className="flex items-center space-x-3 text-gray-400">
+                        <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded font-medium">内容由AI生成</span>
+                        <PanelRightClose size={18} className="cursor-pointer hover:text-gray-700" onClick={() => setIsRightPanelOpen(false)} />
+                      </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                      {chatMessages.length === 0 ? (
+                        <div className="flex items-center justify-center h-full text-sm text-gray-400">
+                          向 Remi 提问以获取灵感
+                        </div>
+                      ) : chatMessages.map((msg, index) => {
+                        const showContext = msg.context && (index === 0 || msg.context !== chatMessages[index - 1].context);
+                        return (
+                          <React.Fragment key={msg.id}>
+                            {showContext && (
+                              <div className="flex justify-center mb-5 w-full">
+                                <div className="rounded-full p-[1.5px] bg-gradient-to-r from-[#8b5cf6] to-[#d8b4fe] max-w-[90%]" style={{boxShadow:'0 0 12px rgba(168,130,255,0.4)'}}>
+                                  <div className="bg-[#fcfaff] rounded-full px-5 py-1.5 flex items-center justify-center text-[11px] font-bold text-[#8b5cf6]">
+                                    <Link size={12} className="mr-1.5 flex-shrink-0" />
+                                    <span className="truncate">{msg.context}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            <div className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-[85%] rounded-2xl p-3.5 text-[13px] leading-relaxed ${
+                                msg.sender === 'user' ? 'bg-white border border-gray-200 shadow-sm text-gray-800 rounded-tr-sm' : 'bg-transparent text-gray-800'
+                              }`}>
+                                {msg.text.split('\n').map((line, i) => (
+                                  <React.Fragment key={i}>
+                                    {line.startsWith('**') ? <strong className="block mt-2 mb-1">{line.replace(/\*\*/g, '')}</strong> : line}
+                                    {i < msg.text.split('\n').length - 1 && <br />}
+                                  </React.Fragment>
+                                ))}
+                              </div>
+                            </div>
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+
+                    <div className="p-4 bg-white border-t border-gray-50">
+                      <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm focus-within:border-purple-300 transition-colors">
+                        <input
+                          type="text"
+                          value={inputValue}
+                          onChange={(e) => setInputValue(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleSendMessage(inputValue)}
+                          placeholder="询问任何问题"
+                          className="w-full bg-transparent outline-none text-[13px] p-2 mb-2"
+                        />
+                        <div className="flex justify-between items-center px-1 pb-1">
+                          <button className="flex items-center px-2 py-1 bg-purple-50 text-purple-600 rounded text-[11px] font-medium">
+                            <Link size={12} className="mr-1" />插入文件
+                          </button>
+                          <button onClick={() => handleSendMessage(inputValue)} className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${inputValue.trim() ? 'bg-[#a882ff] text-white' : 'bg-purple-50 text-purple-300'}`}>
+                            <ArrowUp size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      /* ── 路由渲染 ── */
+      return (
+        <div className="font-sans text-gray-900 h-screen w-full flex overflow-hidden">
+          {(currentRoute === 'topics' || currentRoute === 'inspiration') && (
+            <>
+              <GlobalSidebar />
+              {currentRoute === 'topics' ? <TopicsView /> : <InspirationView />}
+            </>
+          )}
+          {currentRoute === 'topic-detail' && (
+            <TopicDetailView />
+          )}
+        </div>
+      );
+    }
+
+    /* ── 挂载 ── */
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
