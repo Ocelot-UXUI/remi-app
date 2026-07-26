@@ -59,7 +59,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useRef } = React;
+    const { useEffect, useState, useRef } = React;
 
     /* ============================================================
        图标系统 (Lucide 图标 → 内联 SVG React 组件)
@@ -182,6 +182,16 @@
         setRecentActivities(prev => [newActivity, ...prev]);
         setPendingActionCount(prev => prev + 1);
       };
+
+      useEffect(() => {
+        const handleDemoAction = (event) => {
+          if (event.origin !== window.location.origin || event.data?.type !== "remi-demo-action") return;
+          if (event.data.action === "import") simulateExternalImport();
+          if (event.data.action === "chat") simulateExternalChat();
+        };
+        window.addEventListener("message", handleDemoAction);
+        return () => window.removeEventListener("message", handleDemoAction);
+      }, []);
 
       const handleRefresh = () => {
         if (pendingActionCount > 0) {
@@ -351,22 +361,6 @@
               <FileText size={16} className="mr-2" />
               我的资料
             </button>
-          </div>
-          <div className="px-3 pb-4">
-            <div className="px-3 py-2 text-[11px] font-bold text-gray-400 flex items-center tracking-wider mb-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-2 animate-pulse"></span>
-              动作模拟器 (测试)
-            </div>
-            <div className="space-y-1">
-              <button onClick={simulateExternalImport} className="w-full flex items-center px-3 py-2 text-sm rounded-lg text-blue-600 hover:bg-blue-50 transition-colors">
-                <Upload size={14} className="mr-2" />
-                模拟导入文件
-              </button>
-              <button onClick={simulateExternalChat} className="w-full flex items-center px-3 py-2 text-sm rounded-lg text-green-600 hover:bg-green-50 transition-colors">
-                <MessageSquare size={14} className="mr-2" />
-                模拟外部对话
-              </button>
-            </div>
           </div>
           <div className="p-4 border-t border-gray-100">
             <div className="flex items-center space-x-3 px-3 py-2 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50">
