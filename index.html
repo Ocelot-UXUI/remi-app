@@ -131,7 +131,6 @@
       const [uploadState, setUploadState] = useState('idle');
 
       const [chatMessages, setChatMessages] = useState([]);
-      const [inputValue, setInputValue] = useState('');
 
       const [pendingActionCount, setPendingActionCount] = useState(0);
       const [readyCount, setReadyCount] = useState(0);
@@ -288,7 +287,6 @@
         if (!text || typeof text !== 'string' || !text.trim()) return;
         const newUserMsg = { id: Date.now(), text, sender: 'user' };
         setChatMessages(prev => [...prev, newUserMsg]);
-        setInputValue('');
 
         const newActivity = {
           id: Date.now() + 1, type: 'conversation', time: getCurrentTimeStr(),
@@ -335,9 +333,11 @@
       const GlobalSidebar = () => (
         <div className="w-[220px] bg-white border-r border-gray-100 flex flex-col h-full flex-shrink-0 relative z-10">
           <div className="p-5 flex items-center space-x-2">
-            <div className="w-7 h-7 bg-purple-600 rounded-lg flex items-center justify-center text-white font-bold">
-              <Sparkles size={16} />
-            </div>
+            <svg className="w-[22px] h-[26px] flex-none" viewBox="0 0 25 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M10.0422 24.2839L15.2486 23.4848C16.01 23.368 16.5721 22.713 16.5721 21.9427C16.5721 21.3156 16.9529 20.7582 17.5055 20.4617C20.8048 18.6913 23.0301 15.3442 23.0301 11.5065C23.0301 5.82096 18.1459 1.21191 12.121 1.21191C6.0961 1.21193 1.21195 5.82097 1.21191 11.5065C1.21191 13.2925 1.69386 14.9722 2.54171 16.4362C3.00089 17.229 3.5674 17.9586 4.22279 18.6076" stroke="black" strokeWidth="2.42424" strokeLinecap="round"/>
+              <path d="M16.9668 26.3701C16.5871 28.242 14.7969 29.6592 12.6445 29.6592C10.9887 29.6591 9.54696 28.8204 8.79688 27.5811L16.9668 26.3701Z" fill="black"/>
+              <path d="M12.291 2.1084V5.15625C12.291 8.69106 15.2944 11.448 18.7715 11.2021C18.7779 11.3562 18.7818 11.5111 18.7832 11.667L17.5801 11.8223C14.556 12.2104 12.291 14.7851 12.291 17.834V21.4893C12.2342 21.4913 12.1773 21.4961 12.1201 21.4961C12.026 21.4961 11.9321 21.491 11.8389 21.4854V19.4482C11.8389 15.9764 8.94167 13.2565 5.54395 13.3936C5.52599 13.2356 5.51069 13.0764 5.49805 12.916L6.5498 12.7812C9.57369 12.3929 11.8388 9.81922 11.8389 6.77051V2.1123C11.9321 2.10668 12.026 2.10254 12.1201 2.10254C12.1773 2.10254 12.2342 2.10631 12.291 2.1084Z" fill="#7F56D9"/>
+            </svg>
             <span className="text-lg font-bold tracking-tight">remi</span>
           </div>
           <div className="px-4 mb-6">
@@ -351,10 +351,10 @@
               <Book size={16} className="mr-2 text-gray-500" />
               知识库
             </div>
-            <button onClick={() => navigateTo('topics')} className={`w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${currentRoute === 'topics' ? 'bg-purple-50 text-purple-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
+            <button onClick={() => navigateTo('topics')} className={`ml-3 w-[calc(100%-0.75rem)] flex items-center px-3 py-1.5 text-[13px] rounded-lg transition-colors ${currentRoute === 'topics' ? 'bg-purple-50 text-purple-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
               主题
             </button>
-            <button onClick={() => navigateTo('inspiration')} className={`w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${currentRoute === 'inspiration' ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
+            <button onClick={() => navigateTo('inspiration')} className={`ml-3 w-[calc(100%-0.75rem)] flex items-center px-3 py-1.5 text-[13px] rounded-lg transition-colors ${currentRoute === 'inspiration' ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}>
               灵感看板
             </button>
             <button className="w-full flex items-center px-3 py-2 text-sm rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
@@ -458,7 +458,15 @@
       );
 
       /* ── 主题详情页 ── */
-      const TopicDetailView = () => (
+      const TopicDetailView = () => {
+        const [topicChatInput, setTopicChatInput] = useState('');
+        const submitTopicChat = () => {
+          if (!topicChatInput.trim()) return;
+          handleSendMessage(topicChatInput);
+          setTopicChatInput('');
+        };
+
+        return (
         <div className="flex flex-col h-screen w-full bg-white">
           <div className="h-14 border-b border-gray-100 flex items-center justify-between px-4 flex-shrink-0 bg-white z-20">
             <div className="flex items-center space-x-4">
@@ -558,9 +566,9 @@
                 <div className="w-full max-w-3xl bg-white border border-gray-200 rounded-2xl p-3 shadow-sm flex flex-col focus-within:border-purple-300 transition-colors">
                   <input
                     type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage(inputValue)}
+                    value={topicChatInput}
+                    onChange={(e) => setTopicChatInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && submitTopicChat()}
                     placeholder="询问任何问题"
                     className="w-full outline-none text-sm text-gray-700 mb-3 bg-transparent"
                   />
@@ -574,7 +582,7 @@
                         <Layout size={14} />
                       </button>
                     </div>
-                    <button onClick={() => handleSendMessage(inputValue)} className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${inputValue.trim() ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-600'}`}>
+                    <button onClick={submitTopicChat} className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${topicChatInput.trim() ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-600'}`}>
                       <ArrowUp size={16} />
                     </button>
                   </div>
@@ -688,7 +696,8 @@
             </div>
           </div>
         </div>
-      );
+        );
+      };
 
       /* ── 灵感看板 ── */
       const InspirationView = () => {
@@ -698,8 +707,15 @@
         const [isOverTopBar, setIsOverTopBar] = useState(false);
         const [droppedItems, setDroppedItems] = useState([]);
         const [promptInput, setPromptInput] = useState('');
+        const [chatInput, setChatInput] = useState('');
         const [selectedActionTags, setSelectedActionTags] = useState([]);
         const [currentAggregation, setCurrentAggregation] = useState(null);
+
+        const submitChatInput = () => {
+          if (!chatInput.trim()) return;
+          handleSendMessage(chatInput);
+          setChatInput('');
+        };
 
         const scroll = (direction) => {
           if (scrollRef.current) {
@@ -1313,9 +1329,9 @@
                       <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm focus-within:border-purple-300 transition-colors">
                         <input
                           type="text"
-                          value={inputValue}
-                          onChange={(e) => setInputValue(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleSendMessage(inputValue)}
+                          value={chatInput}
+                          onChange={(e) => setChatInput(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && submitChatInput()}
                           placeholder="询问任何问题"
                           className="w-full bg-transparent outline-none text-[13px] p-2 mb-2"
                         />
@@ -1323,7 +1339,7 @@
                           <button className="flex items-center px-2 py-1 bg-purple-50 text-purple-600 rounded text-[11px] font-medium">
                             <Link size={12} className="mr-1" />插入文件
                           </button>
-                          <button onClick={() => handleSendMessage(inputValue)} className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${inputValue.trim() ? 'bg-[#a882ff] text-white' : 'bg-purple-50 text-purple-300'}`}>
+                          <button onClick={submitChatInput} className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${chatInput.trim() ? 'bg-[#a882ff] text-white' : 'bg-purple-50 text-purple-300'}`}>
                             <ArrowUp size={14} />
                           </button>
                         </div>
