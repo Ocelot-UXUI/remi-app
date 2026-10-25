@@ -1,0 +1,6 @@
+/* Shared hover hints, kept outside clipping and stacking contexts. */
+.remi-tooltip{position:fixed;z-index:10000;max-width:min(280px,calc(100vw - 24px));padding:9px 13px;border-radius:10px;background:#2c2c2c;color:#fff;font:400 13px/1.45 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;text-align:center;pointer-events:none;opacity:0;transition:opacity .12s;overflow-wrap:anywhere;box-shadow:0 2px 5px #00000008}
+.remi-tooltip.is-visible{opacity:1}
+.remi-tooltip::after{content:"";position:absolute;left:var(--tip-x,50%);bottom:-5px;width:10px;height:10px;transform:translateX(-50%) rotate(45deg);background:#2c2c2c;border-radius:1px}
+.remi-tooltip.is-below::after{top:-5px;bottom:auto}
+@media(prefers-reduced-motion:reduce){.remi-tooltip{transition:none}}
