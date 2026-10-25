@@ -1,0 +1,10 @@
+
+.board-type-tabs{display:flex;gap:28px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid #eeecf1;margin:0 0 20px;}
+.board-type-tabs::-webkit-scrollbar{display:none;}
+.board-type-tabs button{flex:0 0 auto;position:relative;padding:12px 0 14px;border:0;background:transparent;color:#716b79;font:500 13px/20px "PingFang SC",sans-serif;cursor:pointer;white-space:nowrap;}
+.board-type-tabs button:hover{color:#35303e;}
+.board-type-tabs button.is-active{color:#29252f;}
+.board-type-tabs button.is-active::after{content:"";position:absolute;bottom:0;left:0;right:0;height:2px;border-radius:2px;background:#756099;}
+.board-type-tabs button:focus-visible{outline:2px solid #aa96c9;outline-offset:-2px;border-radius:3px;}
+.board-type-empty{grid-column:1/-1;padding:60px 20px;text-align:center;color:#716b79;font-size:14px;}
+@media(max-width:700px){.board-type-tabs{gap:24px;}}

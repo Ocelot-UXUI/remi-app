@@ -1230,7 +1230,16 @@
 .topic-related-insights .card-question-button{padding:8px 6px;font-size:11px}
 
 </style>
-<link rel="stylesheet" href="hover-hints.css?v=1"><script defer src="hover-hints.js?v=1"></script><link rel="stylesheet" href="topic-workspace.css?v=1"><script src="topic-layout.js?v=1"></script></head>
+<link rel="stylesheet" href="hover-hints.css?v=20261025-ui2"><script defer src="hover-hints.js?v=20261025-ui2"></script><link rel="stylesheet" href="topic-workspace.css?v=20261025-ui2"><script src="topic-layout.js?v=20261025-ui2"></script><style id="board-bottom-fade">
+/* Fade the board into its canvas at the viewport edge without intercepting input. */
+.remi-workspace:has(> .workspace-scroll){position:relative;}
+.remi-workspace:has(> .workspace-scroll)::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:88px;
+  pointer-events:none;z-index:15;
+  background:linear-gradient(to bottom,rgba(247,248,250,0) 0%,rgba(247,248,250,.5) 48%,#f7f8fa 100%);
+}
+.remi-workspace > .workspace-scroll{padding-bottom:112px!important;}
+</style><link rel="stylesheet" href="global-toast.css?v=20261025-ui2"><script src="global-toast.js?v=20261025-ui2"></script><link rel="stylesheet" href="board-type-tabs.css?v=20261025-ui2"></head>
 <body>
   <div id="root"></div>
 
@@ -1469,6 +1478,9 @@ Remi 是一款面向会议与学习场景的 AI 记录助手，帮助你把录�
         return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
       };
 
+      const [boardType, setBoardType] = useState('all');
+      const boardTypes = [['all','全部'],['summary','摘要'],['todo','待办事项'],['main-thread','主线提取'],['golden-quote','金句重温'],['mine-clearance','排雷'],['aggregation','资料整合']];
+      const visibleBoardCards = inspirations.filter(item => boardType === 'all' || item.type === boardType);
       const [recentActivities, setRecentActivities] = useState([{"id": 1, "type": "document", "time": "18:30", "tag": "文档", "content": "Remi使用案例.txt", "topic": "毕设小组讨论"}, {"id": 2, "type": "recording", "time": "17:10", "tag": "录音", "content": "小组讨论录音.m4a", "topic": "毕设小组讨论"}, {"id": 3, "type": "conversation", "time": "16:40", "tag": "对话", "content": "如何验证原型的操作反馈？", "topic": "交互设计讨论"}]);
 
       const simulateExternalImport = () => {
@@ -1482,6 +1494,7 @@ Remi 是一款面向会议与学习场景的 AI 记录助手，帮助你把录�
         };
         setRecentActivities(prev => [newActivity, ...prev]);
         setPendingActionCount(prev => prev + 1);
+        window.remiNotifyImportSuccess();
       };
 
       const simulateExternalChat = () => {
@@ -1496,6 +1509,7 @@ Remi 是一款面向会议与学习场景的 AI 记录助手，帮助你把录�
         };
         setRecentActivities(prev => [newActivity, ...prev]);
         setPendingActionCount(prev => prev + 1);
+        window.remiNotifyImportSuccess("外部对话已添加");
       };
 
       useEffect(() => {
@@ -2482,7 +2496,7 @@ Remi 是一款面向会议与学习场景的 AI 记录助手，帮助你把录�
                         {recentActivities.map(activity => (
                           <article role="button" tabIndex={0} aria-label={`添加 ${activity.content} 到搜索`} aria-pressed={droppedItems.some(item => item.id === activity.id)} onClick={() => addRecentContext(activity)} onKeyDown={e => {if(e.key === 'Enter' || e.key === ' '){e.preventDefault();addRecentContext(activity);}}} key={activity.id} draggable={true} onDragStart={(e) => handleDragStart(e, activity)} onDragEnd={handleDragEnd} className={`recent-resource ${recentActivities.length === 1 ? 'is-only' : ''} ${String(draggedItemId) === String(activity.id) ? 'is-dragging' : ''}`}>
                             <span className={`recent-resource-icon ${activity.type}`} aria-hidden="true">
-                              {activity.type === 'document' && !/\.(jsx?|tsx?|py|html|css|json)$/i.test(activity.content) ? <svg width="30" height="36" viewBox="0 0 30 36" fill="none"><path d="M6 1.5h12l8 8V32a2.5 2.5 0 0 1-2.5 2.5h-18A2.5 2.5 0 0 1 3 32V4a2.5 2.5 0 0 1 3-2.5Z" fill="#fff" stroke="#c8c7cd" strokeWidth="1.2"/><path d="M18 1.5V8a1.5 1.5 0 0 0 1.5 1.5H26" fill="#eeedf1" stroke="#c8c7cd" strokeWidth="1.2"/><text x="14.5" y="24" fill="#7c7885" textAnchor="middle" fontFamily="-apple-system,Arial,sans-serif" fontSize="7" fontWeight="650">{activity.content.includes('.') ? activity.content.split('.').pop().slice(0,4).toUpperCase() : 'DOC'}</text></svg> : activity.type === 'recording' ? <svg width="25" height="30" viewBox="0 0 30 36" fill="none" stroke="#b6b2c1" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><rect x="10" y="3" width="10" height="20" rx="5" fill="#f8f7fa"/><path d="M6 17v1a9 9 0 0 0 18 0v-1M15 27v6m-5 0h10M13 8h4m-4 4h4"/></svg> : (activity.type === 'code' || /\.(jsx?|tsx?|py|html|css|json)$/i.test(activity.content)) ? <svg width="25" height="30" viewBox="0 0 30 36" fill="none" stroke="#b6b2c1" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="26" height="26" rx="3" fill="#fff"/><path d="M2 12h26"/><path d="m10 17-4 4 4 4m10-8 4 4-4 4m-4-9-2 10"/><circle cx="6" cy="8.5" r=".7" fill="#b6b2c1" stroke="none"/></svg> : <svg width="25" height="30" viewBox="0 0 30 36" fill="none" stroke="#b6b2c1" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 5h20a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3H12l-8 6v-6a3 3 0 0 1-2-3V8a3 3 0 0 1 3-3Z" fill="#fff"/><path d="M8 12h14M8 17h10"/></svg>}
+                              <svg width="30" height="36" viewBox="0 0 30 36" fill="none"><path d="M6 1.5h12l8 8V32a2.5 2.5 0 0 1-2.5 2.5h-18A2.5 2.5 0 0 1 3 32V4a2.5 2.5 0 0 1 3-2.5Z" fill="#fff" stroke="#c8c7cd" strokeWidth="1.2"/><path d="M18 1.5V8a1.5 1.5 0 0 0 1.5 1.5H26" fill="#eeedf1" stroke="#c8c7cd" strokeWidth="1.2"/>{activity.type === 'recording' ? <g stroke="#7c7885" strokeWidth="1.2" strokeLinecap="round"><path d="M9 20v4m3-7v10m3-12v14m3-11v8m3-6v4"/></g> : (activity.type === 'code' || /\.(jsx?|tsx?|py|html|css|json)$/i.test(activity.content)) ? <g stroke="#7c7885" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="m11 18-4 4 4 4m8-8 4 4-4 4m-3-9-2 10"/></g> : activity.type === 'document' ? <text x="14.5" y="24" fill="#7c7885" textAnchor="middle" fontFamily="-apple-system,Arial,sans-serif" fontSize="7" fontWeight="650">{activity.content.includes('.') ? activity.content.split('.').pop().slice(0,4).toUpperCase() : 'DOC'}</text> : <g stroke="#7c7885" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 17h10a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 20 26h-6l-4 3v-3a1.5 1.5 0 0 1-1.5-1.5v-6A1.5 1.5 0 0 1 10 17Z"/><path d="M12 20h6m-6 3h4"/></g>}</svg>
                             </span>
                             <div className="recent-resource-copy">
                               <p className="recent-resource-title" data-tooltip={activity.content}>{activity.content}</p>
@@ -2538,16 +2552,19 @@ Remi 是一款面向会议与学习场景的 AI 记录助手，帮助你把录�
                       <div className="board-section-heading flex justify-between items-end mb-5">
                         <div>
                           <h3 className="text-[13px] font-semibold text-gray-900 mb-1">灵感看板</h3>
-                          <p className="text-[11px] text-gray-400">阅读要点、待办与跨资料发现</p>
+                          
                         </div>
                         <button onClick={() => openBoardChat()} className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-full text-[12px] font-bold text-gray-600 hover:bg-gray-50 shadow-sm transition">
                           <MessageSquare size={14} className="mr-1.5" />
                           问问 Remi
                         </button>
                       </div>
+                      <div className="board-type-tabs" role="tablist" aria-label="按卡片类型筛选" onKeyDown={e=>{const keys=['ArrowLeft','ArrowRight','Home','End'];if(!keys.includes(e.key))return;e.preventDefault();const tabs=Array.from(e.currentTarget.querySelectorAll('[role=tab]'));const index=tabs.indexOf(document.activeElement);const next=e.key==='Home'?0:e.key==='End'?tabs.length-1:(index+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;tabs[next].click();tabs[next].focus();tabs[next].scrollIntoView({block:'nearest',inline:'nearest'});}}>
+                        {boardTypes.map(([type,label])=><button key={type} type="button" role="tab" id={'board-type-'+type} aria-selected={boardType===type} aria-controls="board-type-results" tabIndex={boardType===type?0:-1} className={boardType===type?'is-active':''} onClick={()=>setBoardType(type)}>{label}</button>)}
+                      </div>
                       <div className={`board-conversation-layout ${floatingCard ? 'is-chatting' : ''}`}>
-                      <div ref={boardGridRef} className="sidebar-aware-grid" style={{display:'grid',gridTemplateColumns:`repeat(${boardColumns}, minmax(0, 1fr))`,gap:16,alignItems:'start'}}>
-                        {renderMasonryColumns(inspirations,boardColumns)}
+                      <div role="tabpanel" id="board-type-results" aria-labelledby={"board-type-"+boardType} tabIndex={0} ref={boardGridRef} className="sidebar-aware-grid" style={{display:'grid',gridTemplateColumns:`repeat(${boardColumns}, minmax(0, 1fr))`,gap:16,alignItems:'start'}}>
+                        {visibleBoardCards.length ? renderMasonryColumns(visibleBoardCards,boardColumns) : <div className="board-type-empty">暂无这类卡片</div>}
                       </div>
                       {floatingCard && renderInlineChat(floatingCard)}
                       </div>
