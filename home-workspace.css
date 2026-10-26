@@ -63,3 +63,30 @@
 .home-top-actions button::after,.home-composer-tools button::after,.home-input-hint button::after,.home-quick-questions button::after,.home-section>header>button::after,.home-source::after,.home-chat>header button::after,.home-attachments button::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:100%;height:100%;min-width:44px;min-height:44px}
 .home-source{min-height:44px}
 .home-chat>header button,.home-attachments button{display:flex;align-items:center;justify-content:center;min-width:24px;min-height:24px}
+
+/* Broad, slow colour ribbons drift across the centre while the white rim stays still. */
+.home-composer{background:#fff}
+.home-composer-wash{position:absolute;inset:0;z-index:-1;border-radius:inherit;overflow:hidden;pointer-events:none;opacity:1;mask-image:radial-gradient(ellipse 64% 110% at 50% 54%,#000 18%,#000e 48%,transparent 91%);transition:opacity 180ms ease-out}
+.home-composer-wash>i{position:absolute;display:block;left:-15%;top:-45%;width:130%;height:190%;background:radial-gradient(ellipse 52% 48% at 43% 52%,#e9e1f3 0%,#eee8f7b3 38%,transparent 80%);animation:remi-composer-blue 6s cubic-bezier(.45,0,.55,1) infinite alternate;will-change:transform}
+.home-composer-wash>i+i{left:-12%;background:radial-gradient(ellipse 49% 44% at 58% 54%,#e5daefa6 0%,#eee7f673 42%,transparent 82%);animation:remi-composer-lilac 7.5s cubic-bezier(.45,0,.55,1) infinite alternate}
+@keyframes remi-composer-blue{0%{transform:translate(-20%,-3%) rotate(-6deg) scale(1.05,.85)}50%{transform:translate(0,4%) rotate(2deg) scale(1,1.08)}100%{transform:translate(24%,-2%) rotate(7deg) scale(1.12,.92)}}
+@keyframes remi-composer-lilac{0%{transform:translate(20%,4%) rotate(5deg) scale(1.05,1)}50%{transform:translate(-2%,-3%) rotate(-3deg) scale(1.1,.9)}100%{transform:translate(-25%,2%) rotate(-7deg) scale(1,1.08)}}
+.home-composer:hover .home-composer-wash{opacity:1}
+.home-composer:focus-within .home-composer-wash{opacity:0}
+@media(prefers-reduced-motion:reduce){.home-composer-wash{transition:none}.home-composer-wash>i{animation:none;will-change:auto}}
+@media print{.home-composer-wash>i{animation:none}}
+
+/* Home previews use the same compact provenance and conversation footer as the board. */
+.home-insight .home-card-footer{margin:0 -20px;padding:8px 20px 18px;align-items:center;margin-top:auto;border:0;background:transparent}
+.home-card-footer .card-question-area{padding:0;flex:none}
+.home-card-footer .card-question-button{display:inline-flex;align-items:center;gap:5px;height:32px;padding:0;border:0;background:transparent;color:#6c4c87;cursor:pointer;font:400 13px/20px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
+.home-card-footer .card-question-button:hover{color:#593771}
+.home-card-footer .card-question-button:focus-visible{outline:2px solid #a084bf;outline-offset:3px}
+
+/* Selecting a card adds a compact reference to the existing composer. */
+.home-card-reference{position:relative;z-index:1;display:flex;align-items:center;gap:7px;width:fit-content;max-width:100%;box-sizing:border-box;margin:0 0 12px;padding:7px 9px;border-radius:9px;background:#f1edf6;color:#756385;font-size:13px;line-height:20px}
+.home-card-reference>svg{flex:none}
+.home-card-reference>span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.home-card-reference button{display:grid;place-items:center;flex:none;width:24px;height:24px;margin:-2px -3px -2px 5px;padding:0;border:0;border-radius:6px;background:transparent;color:#91829e;cursor:pointer}
+.home-card-reference button:hover{background:#e5deed;color:#675577}
+.home-card-reference button:focus-visible{outline:2px solid #a084bf;outline-offset:2px}

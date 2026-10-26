@@ -1,0 +1,179 @@
+.chatpage-workspace{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;background:#fff;color:#302c38}
+.chatpage-topbar{height:76px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 30px;background:#fff}
+.chatpage-title-group{display:flex;align-items:center;gap:12px;min-width:0}
+.chatpage-title-group>div{min-width:0}
+.chatpage-topbar h1{font-size:15px;font-weight:600;line-height:24px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0;color:#332e3a}
+.chatpage-title-group>div>span{display:block;font-size:12px;line-height:19px;color:#928898}
+.chatpage-back,.chatpage-new{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:none;border:0;border-radius:10px;background:transparent;color:#7e7487;cursor:pointer;min-height:44px;padding:0 12px;font:400 14px/20px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;white-space:nowrap}
+.chatpage-back{width:44px;height:44px;padding:0;background:#f7f5f9}
+.chatpage-back>svg{transform:rotate(180deg);flex:none}
+.chatpage-new{background:#f7f5f9;color:#64566f}
+.chatpage-back:hover,.chatpage-new:hover{background:#eeebf3}
+.chatpage-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:28px 40px 24px;scrollbar-width:thin;scrollbar-color:#ded8e4 transparent}
+.chatpage-column{width:100%;max-width:760px;margin:0 auto}
+.chatpage-empty{padding:clamp(20px,5vh,70px) 0 36px;max-width:640px;margin:0 auto}
+.chatpage-empty-logo{display:flex;margin-bottom:24px}
+.chatpage-empty-logo>svg{width:29px;height:35px}
+.chatpage-empty h2{font-size:25px;line-height:1.5;letter-spacing:-.5px;font-weight:600;margin:0 0 10px;color:#342d3d}
+.chatpage-empty>p{font-size:15px;line-height:1.7;color:#887c93;margin:0 0 24px}
+.chatpage-card-preview{padding:16px 18px;background:#f7f4fb;border-radius:12px;margin-bottom:24px}
+.chatpage-card-preview>span{font-size:12px;color:#9a85b0}
+.chatpage-card-preview>p{margin:6px 0 0;font-size:14px;line-height:1.8;color:#6b5c78;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.chatpage-card-preview.preview-main-thread{background:#f0f7fb}
+.chatpage-card-preview.preview-todo{background:#f1f8f3}
+.chatpage-card-preview.preview-golden-quote{background:#fcf9ed}
+.chatpage-card-preview.preview-mine-clearance{background:#fcf1f4}
+.chatpage-prompts{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.chatpage-prompts button{display:inline-flex;align-items:center;justify-content:space-between;gap:20px;min-height:44px;max-width:100%;border:0;border-radius:9px;background:transparent;color:#79618f;padding:9px 10px;margin-left:-10px;cursor:pointer;font:400 14px/22px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;text-align:left}
+.chatpage-prompts button:hover{background:#f4f0f8}
+.chatpage-prompts button>svg{flex:none;color:#b3a2c2}
+.chatpage-message{margin:0 0 30px;max-width:100%}
+.chatpage-message.is-user{margin-left:auto;max-width:82%;width:fit-content;margin-bottom:32px}
+.chatpage-message-reference{font-size:12px;line-height:20px;color:#a08dac;display:flex;align-items:center;gap:5px;margin:0 2px 8px;justify-content:flex-end}
+.chatpage-message-reference>svg{flex:none}
+.chatpage-user-bubble{font-size:15px;line-height:1.8;background:#f1edf7;color:#4c3f59;border-radius:16px 16px 5px 16px;padding:11px 17px;white-space:pre-wrap;overflow-wrap:anywhere}
+.chatpage-remi-identity{display:flex;align-items:center;gap:9px;margin:0 0 16px}
+.chatpage-remi-identity>span{display:flex;align-items:center;justify-content:center;width:26px;height:30px}
+.chatpage-remi-identity>strong{font-size:14px;font-weight:600;color:#554760}
+.chatpage-answer{font-size:16px;line-height:1.9;color:#494151;overflow-wrap:anywhere}
+.chatpage-answer>p{margin:0 0 18px;white-space:pre-line}
+.chatpage-answer-block{margin:0 0 18px}
+.chatpage-answer-block h3{font-size:16px;font-weight:600;line-height:1.7;margin:0 0 6px;color:#3d3347}
+.chatpage-answer-block p{margin:0;white-space:pre-line}
+.chatpage-answer>p:last-child,.chatpage-answer-block:last-child{margin-bottom:0}
+.chatpage-reply-tools{display:flex;align-items:center;gap:6px;margin:10px 0 0 -12px;font-size:12px;color:#94859f}
+.chatpage-reply-tools button{display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:9px;background:transparent;color:#a498ad;cursor:pointer}
+.chatpage-reply-tools button:hover{background:#f4f1f8;color:#7a658d}
+.chatpage-pending{display:flex;align-items:center;gap:8px;font-size:14px;color:#a090ad;padding:0 0 20px}
+.chatpage-pending-dot{width:6px;height:6px;border-radius:50%;background:#b4a0c6}
+.chatpage-composer-dock{flex:none;padding:12px 40px 14px;background:linear-gradient(#ffffff00,#fff 12px)}
+.chatpage-composer{max-width:760px;margin:0 auto;padding:17px 20px 12px;border-radius:20px;background:#f7f5fa;box-shadow:none;transition:background-color 160ms cubic-bezier(.2,.8,.2,1),box-shadow 160ms cubic-bezier(.2,.8,.2,1)}
+.chatpage-composer:focus-within{background:#faf9fc;box-shadow:0 3px 22px #3824490a}
+.chatpage-composer textarea{box-sizing:border-box;display:block;width:100%;height:60px;border:0;outline:none;resize:none;background:transparent;color:#44394f;padding:1px 0;font:400 16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;scrollbar-width:thin}
+.chatpage-composer textarea::placeholder{color:#a597af}
+.chatpage-composer-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:8px;min-height:44px}
+.chatpage-context-tools{display:flex;align-items:center;gap:12px;min-width:0}
+.chatpage-reference{display:flex;align-items:center;gap:6px;min-width:0;color:#8c779e;font-size:12px;line-height:20px}
+.chatpage-reference>span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:280px}
+.chatpage-reference>svg{flex:none}
+.chatpage-reference button{display:grid;place-items:center;position:relative;flex:none;width:24px;height:28px;border:0;border-radius:6px;background:transparent;color:#af9cbd;cursor:pointer}
+.chatpage-reference button::after{content:'';position:absolute;inset:-8px -10px}
+.chatpage-reference button:hover{background:#eae3f1;color:#7c648e}
+.chatpage-scope-label{display:flex;align-items:center;gap:6px;font-size:13px;color:#8f7e9d}
+.chatpage-source-picker{position:relative;flex:none;font-size:12px;color:#9985a9}
+.chatpage-source-picker summary{display:flex;align-items:center;gap:4px;list-style:none;cursor:pointer;min-height:44px;padding:0 5px;white-space:nowrap}
+.chatpage-source-picker summary>svg{transform:rotate(-90deg)}
+.chatpage-source-picker[open] summary>svg{transform:rotate(90deg)}
+.chatpage-source-picker>div{position:absolute;bottom:52px;left:0;z-index:3;min-width:250px;max-width:320px;padding:12px 15px;background:#fff;border-radius:13px;box-shadow:0 4px 26px #33213f1a}
+.chatpage-source-picker>div>strong{display:block;font-size:12px;font-weight:500;color:#ad9eb7;margin-bottom:5px}
+.chatpage-source-picker>div>span{display:flex;align-items:flex-start;gap:7px;padding:8px 0;color:#71617f;overflow-wrap:anywhere;font-size:13px;line-height:1.6}
+.chatpage-source-picker>div>span>svg{flex:none;margin-top:3px}
+.chatpage-send{display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:13px;color:#fff;background:#80659b;cursor:pointer;flex:none}
+.chatpage-send:hover:not(:disabled){background:#6f538b}
+.chatpage-send:disabled{color:#b5a6c1;background:#ece6f2;cursor:default}
+.chatpage-demo-note{margin:9px auto 0;text-align:center;color:#a496ae;font-size:12px;line-height:18px}
+.chatpage-workspace button:focus-visible,.chatpage-workspace summary:focus-visible{outline:2px solid #a084bf;outline-offset:3px}
+.remi-recent-conversations{margin-top:26px}
+.remi-recent-conversations button{display:flex;align-items:center;gap:9px;border-radius:9px;font-size:13px;min-height:40px}
+.remi-recent-conversations button>svg{flex:none;width:15px;height:15px;color:#a091ab}
+.remi-recent-conversations button>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.remi-recent-conversations button.is-current-conversation{background:#f2edf8;color:#795b93}
+.chatpage-history-empty{display:block;padding:4px 12px;color:#aca1b5;font-size:12px}
+.remi-sidebar.is-collapsed .remi-recent-conversations{display:none}
+@media(max-width:700px){.chatpage-topbar{height:68px;padding:0 16px;gap:8px}.chatpage-title-group{gap:8px}.chatpage-topbar h1{font-size:14px}.chatpage-new span{display:none}.chatpage-new{padding:0;width:44px}.chatpage-scroll{padding:20px 20px 10px}.chatpage-empty{padding-top:24px}.chatpage-empty h2{font-size:22px}.chatpage-composer-dock{padding:10px 14px 12px}.chatpage-answer{font-size:15px}.chatpage-message.is-user{max-width:95%}.chatpage-reference>span{max-width:140px}.chatpage-context-tools{gap:5px}.chatpage-source-picker>div{left:auto;right:0}}
+@media(prefers-reduced-motion:reduce){.chatpage-composer{transition:none}}
+
+.chatpage-title-group>div>span{color:#81718c}
+.chatpage-composer{background:#f4f1f7}
+.chatpage-composer:focus-within{background:#fff;box-shadow:0 3px 26px #3824490e}
+.chatpage-composer textarea::placeholder{color:#84748e}
+.chatpage-reference{color:#7c668c}
+.chatpage-source-picker{color:#806a90}
+.chatpage-demo-note{color:#8a7a95}
+.remi-recent-conversations button{min-height:44px}
+
+.chatpage-empty{max-width:none}.chatpage-card-preview>p{white-space:pre-line}
+
+/* Reuse the homepage composer surface, moving wash and custom controls. */
+.chatpage-workspace{background:#f5f5f8}
+.chatpage-topbar{background:transparent}
+.chatpage-back,.chatpage-new{background:#fff}
+.chatpage-composer-dock{background:linear-gradient(#f5f5f800,#f5f5f8 12px)}
+.chatpage-composer.home-composer{position:relative;isolation:isolate;max-width:760px;padding:21px 24px 15px;border:0;border-radius:24px;background:#fff;box-shadow:none}
+.chatpage-composer.home-composer:hover,.chatpage-composer.home-composer:focus-within{background:#fff;box-shadow:0 8px 28px #3326410b}
+.chatpage-composer.home-composer textarea{height:80px;font-size:16px;padding:0;background:transparent;position:relative}
+.chatpage-composer-footer{position:relative;margin-top:8px}
+.chatpage-add,.chatpage-mic{position:relative;display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:10px;background:transparent;color:#82758e;cursor:pointer;flex:none}
+.chatpage-add::after,.chatpage-mic::after{content:'';position:absolute;inset:-4px}
+.chatpage-add:hover,.chatpage-mic:hover{background:#f0ebf6}
+.chatpage-mic.is-recording{color:#bb5c79;background:#faedf2}
+.chatpage-context-tools{gap:10px}
+.chatpage-reference,.chatpage-scope-label{padding:6px 8px;background:#f5f2f9;border-radius:9px;gap:7px;color:#80728c}
+.chatpage-send-tools{display:flex;align-items:center;gap:12px}
+.chatpage-send{border-radius:12px;width:38px;height:38px;position:relative}
+.chatpage-send::after{content:'';position:absolute;inset:-3px}
+@media(max-width:700px){.chatpage-composer.home-composer{padding:18px 16px 12px}.chatpage-reference>span{max-width:110px}.chatpage-context-tools{gap:4px}.chatpage-send-tools{gap:5px}.chatpage-source-picker summary{font-size:11px}}
+
+/* Recent conversations share one row grid and the main navigation inset. */
+.remi-sidebar .remi-recent-conversations{padding:0;margin-top:26px}
+.remi-sidebar .remi-recent-conversations>p{margin:0 16px 10px;line-height:20px}
+.remi-sidebar .remi-recent-conversations>button{box-sizing:border-box;display:grid;grid-template-columns:20px minmax(0,1fr);align-items:center;column-gap:12px;width:100%;height:44px;min-height:44px;margin:2px 0;padding:0 16px;border:0;border-radius:10px;text-align:left;font:400 14px/22px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;color:#625a6b;background:transparent;overflow:hidden}
+.remi-sidebar .remi-recent-conversations>button>svg{display:block;justify-self:center;width:17px;height:17px;margin:0;flex:none;color:#9a89a9}
+.remi-sidebar .remi-recent-conversations>button>span{display:block;min-width:0;line-height:22px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.remi-sidebar .remi-recent-conversations>button:hover{background:#f6f3f9;color:#655073}
+.remi-sidebar .remi-recent-conversations>button.is-current-conversation{background:#f0ebf6;color:#795a91}
+.remi-sidebar .remi-recent-conversations>button:focus-visible{outline:2px solid #ac94bf;outline-offset:-2px}
+
+.chatpage-user-time{display:block;margin:7px 1px 0;text-align:right;font-size:12px;line-height:18px;color:#9b8ba6;font-variant-numeric:tabular-nums}
+.chatpage-reply-time{font-size:12px;line-height:20px;color:#9b8ba6;font-weight:400;margin-left:3px;font-variant-numeric:tabular-nums}
+.chatpage-reply-tools{gap:2px;margin-top:12px;flex-wrap:wrap}
+.chatpage-reply-tools button{color:#9a8aa7;flex:none}
+.chatpage-reply-tools button[aria-pressed=true]{color:#7e5c99;background:#eee7f5}
+.chatpage-reply-tools button:disabled{opacity:.4;cursor:default}
+.chatpage-action-divider{height:15px;width:1px;margin:0 7px;background:#e0d8e8}
+.chatpage-reply-elapsed{margin-left:auto;padding-left:12px;font-size:12px;line-height:20px;color:#9b8ba6;font-variant-numeric:tabular-nums}
+.chatpage-feedback-note{font-size:12px;color:#917c9f;margin:0 4px}
+
+.chatpage-model-picker{position:relative;flex:none;color:#766681;font-size:13px;line-height:20px}
+.chatpage-model-picker>summary{display:flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 8px;border-radius:9px;list-style:none;cursor:pointer;white-space:nowrap}
+.chatpage-model-picker>summary::-webkit-details-marker{display:none}
+.chatpage-model-picker>summary>svg{transform:rotate(90deg);color:#a18eaf}
+.chatpage-model-picker[open]>summary>svg{transform:rotate(-90deg)}
+.chatpage-model-picker>summary:hover,.chatpage-model-picker[open]>summary{background:#f4f0f8}
+.chatpage-model-menu{position:absolute;bottom:52px;right:0;z-index:4;box-sizing:border-box;width:290px;max-width:calc(100vw - 32px);padding:8px;background:#fff;border-radius:16px;box-shadow:0 5px 28px #34213f18,0 0 1px #34213f20}
+.chatpage-model-menu>button{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;min-height:76px;padding:12px 14px;background:transparent;border:0;border-radius:10px;color:#3d3447;text-align:left;cursor:pointer}
+.chatpage-model-menu>button:hover{background:#f6f3f9}
+.chatpage-model-menu>button>span{display:flex;flex-direction:column;gap:5px;min-width:0}
+.chatpage-model-menu strong{font-size:14px;line-height:22px;font-weight:500}
+.chatpage-model-menu small{font-size:12px;line-height:20px;color:#8b7e96;font-weight:400}
+.chatpage-model-menu>button>svg{flex:none;color:#9172ad}
+.chatpage-model-menu>button:disabled{opacity:.45;cursor:default}
+@media(max-width:700px){.chatpage-model-picker>summary{padding:0 5px;font-size:12px}.chatpage-context-tools{flex:1;overflow:visible;min-width:0}.chatpage-reference>span{max-width:80px}.chatpage-send-tools{gap:2px}.chatpage-source-picker{display:none}}
+
+/* Show an identifiable quoted card, rather than a coloured strip of flattened text. */
+.chatpage-empty .chatpage-card-preview{box-sizing:border-box;max-width:620px;padding:20px 22px;margin:0 0 24px;background:#fff;border:0;border-radius:16px;box-shadow:0 2px 12px #34213f04}
+.chatpage-card-preview>header{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.chatpage-card-preview>header>div{min-width:0}
+.chatpage-card-preview>header>div>span{font-size:12px;line-height:20px;color:#9a8da5}
+.chatpage-card-preview h3{margin:6px 0 0;color:#403648;font-size:16px;line-height:25px;font-weight:600}
+.chatpage-preview-kind{display:flex;align-items:center;justify-content:center;flex:none;color:#c8b4dc}
+.chatpage-preview-kind>svg{stroke-width:1.6}
+.preview-todo .chatpage-preview-kind{color:#afc9b5}
+.preview-main-thread .chatpage-preview-kind{color:#afcadb}
+.preview-mine-clearance .chatpage-preview-kind{color:#ddbac8}
+.preview-golden-quote .chatpage-preview-kind{color:#d8c492;font-size:44px;line-height:32px;font-weight:600}
+.chatpage-preview-tasks{list-style:none;padding:0;margin:18px 0 0;display:flex;flex-direction:column;gap:12px}
+.chatpage-preview-tasks>li{display:flex;align-items:center;gap:9px;font-size:14px;line-height:24px;color:#5f5469}
+.chatpage-preview-task-mark{width:13px;height:13px;box-sizing:border-box;border:1px solid #bad1c0;border-radius:3px;flex:none}
+.chatpage-preview-tasks>li>small{margin-left:auto;flex:none;padding-left:12px;font-size:12px;color:#94859e}
+.chatpage-card-preview>p{margin:16px 0 0;font-size:14px;line-height:1.85;color:#6d6078}
+@media(max-width:700px){.chatpage-empty .chatpage-card-preview{padding:18px}.chatpage-preview-tasks>li{flex-wrap:wrap}.chatpage-preview-tasks>li>small{padding-left:22px;width:100%}}
+
+/* Topic and conversation history use the same grid. */
+.remi-sidebar .remi-recent-topics:not(.remi-recent-conversations){padding:0}
+.remi-sidebar .remi-recent-topics:not(.remi-recent-conversations)>p{margin:0 16px 10px;line-height:20px}
+.remi-sidebar .remi-recent-topics:not(.remi-recent-conversations)>button{box-sizing:border-box;display:grid;grid-template-columns:20px minmax(0,1fr);align-items:center;column-gap:12px;width:100%;height:44px;min-height:44px;margin:2px 0;padding:0 16px;border:0;border-radius:10px;text-align:left;font:400 14px/22px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;color:#625a6b;background:transparent;overflow:hidden}
+.remi-sidebar .remi-recent-topics:not(.remi-recent-conversations)>button>svg{display:block;justify-self:center;width:17px;height:17px;margin:0;color:#9a89a9}
+.remi-sidebar .remi-recent-topics:not(.remi-recent-conversations)>button>span{display:block;min-width:0;line-height:22px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.remi-sidebar .remi-recent-topics:not(.remi-recent-conversations)>button:hover{background:#f6f3f9;color:#655073}
+.remi-sidebar .remi-recent-topics:not(.remi-recent-conversations)>button:focus-visible{outline:2px solid #ac94bf;outline-offset:-2px}
