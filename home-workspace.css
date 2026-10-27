@@ -90,3 +90,32 @@
 .home-card-reference button{display:grid;place-items:center;flex:none;width:24px;height:24px;margin:-2px -3px -2px 5px;padding:0;border:0;border-radius:6px;background:transparent;color:#91829e;cursor:pointer}
 .home-card-reference button:hover{background:#e5deed;color:#675577}
 .home-card-reference button:focus-visible{outline:2px solid #a084bf;outline-offset:2px}
+
+/* Existing topics and conversations, presented as lightweight recent previews. */
+.home-recent-section{margin-top:38px;padding-bottom:32px}
+.home-section .home-recent-filters{display:flex;gap:4px;background:#eeedf2;padding:3px;border-radius:10px}
+.home-section .home-recent-filters button{padding:6px 15px;border-radius:8px;font-size:13px;color:#77727e;line-height:20px}
+.home-section .home-recent-filters button[aria-pressed=true]{background:#fff;color:#292630;box-shadow:0 1px 3px #2620320a}
+.home-recent-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.home-recent-item{display:flex;align-items:center;gap:16px;min-width:0;min-height:122px;padding:16px;text-align:left;background:#fff;border:0;border-radius:16px;cursor:pointer;transition:box-shadow .18s,background .18s;color:#302d38}
+.home-recent-item:hover{background:#fdfcff;box-shadow:0 5px 20px #30223d0a}
+.home-recent-item:focus-visible{outline:2px solid #9a85be;outline-offset:3px}
+.home-recent-cover{width:104px;height:90px;object-fit:cover;border-radius:10px;flex:none}
+.home-recent-chat-art{display:grid;place-items:center;align-self:center;flex:none;width:54px;height:54px;background:#f3f0f8;color:#8b74a5;border-radius:16px}
+.home-recent-copy{display:flex;flex:1;flex-direction:column;min-width:0;gap:7px}
+.home-recent-meta{display:flex;align-items:center;gap:12px;font-size:12px;line-height:18px;color:#827d89}
+.home-recent-meta>span{color:#96919b}
+.home-recent-copy strong{font-size:15px;line-height:22px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.home-recent-excerpt{font-size:13px;line-height:20px;color:#7a7482;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.home-recent-arrow{flex:none;color:#aaa3b2}
+.home-recent-empty{padding:32px;text-align:center;color:#817a89;font-size:14px}
+@media(max-width:850px){.home-recent-grid{grid-template-columns:1fr}}
+
+/* Semantic shortcut artwork, drawn as a shared rounded family. */
+.home-quick-questions{gap:12px;margin-top:20px}
+.home-quick-questions button{gap:9px;padding:9px 12px;border-radius:12px;color:#655e70;transition:background .16s,color .16s}
+.home-quick-questions button:hover{background:rgba(255,255,255,.8);color:#665086}
+.home-quick-questions .home-question-glyph{flex:none;color:#8c79a3;width:22px;height:22px}
+.home-quick-questions button>svg:last-child{width:12px;height:12px;margin-left:1px;color:#8c79a3;opacity:.55}
+.home-quick-questions button:hover>svg:last-child{opacity:1}
+@media(max-width:650px){.home-quick-questions{gap:2px 8px}.home-quick-questions button{padding:7px 3px;gap:7px}.home-quick-questions .home-question-glyph{width:20px;height:20px}}
