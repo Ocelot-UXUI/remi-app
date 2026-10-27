@@ -1,0 +1,6 @@
+
+/* Resource thumbnails: one rounded paper family, without shadows. */
+.remi-workspace .activity-section .recent-resource-icon{width:34px;height:40px;background:transparent;color:#706779}
+.remi-workspace .activity-section .recent-resource-icon>svg{width:30.4px;height:38px;max-width:none;max-height:none;display:block}
+.tw-file-icon:has(.resource-glyph){width:30px;height:38px;background:transparent;flex:none}
+.resource-glyph{display:block;flex-shrink:0;overflow:visible}
