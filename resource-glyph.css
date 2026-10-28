@@ -4,3 +4,22 @@
 .remi-workspace .activity-section .recent-resource-icon>svg{width:30.4px;height:38px;max-width:none;max-height:none;display:block}
 .tw-file-icon:has(.resource-glyph){width:30px;height:38px;background:transparent;flex:none}
 .resource-glyph{display:block;flex-shrink:0;overflow:visible}
+
+/* Quiet neutral surfaces; spacing separates the resources. */
+.remi-workspace .activity-section{background:transparent}
+.remi-workspace .activity-section .recent-resource{
+  background:#f1f1f2;
+  border-radius:10px;
+  transition:background-color .16s ease;
+}
+.remi-workspace .activity-section .recent-resource:hover{background:#eaeaec}
+.remi-workspace .activity-section .recent-resource[aria-pressed="true"]{background:#e4e4e7}
+.remi-workspace .activity-section .recent-resource.is-dragging{background:#e4e4e7;opacity:.45}
+@media(prefers-reduced-motion:reduce){
+  .remi-workspace .activity-section .recent-resource{transition:none}
+}
+
+.remi-workspace .activity-section .recent-resource-track.has-more-right{
+  -webkit-mask-image:linear-gradient(to right,#000 0%,#000 calc(100% - 64px),transparent 100%);
+  mask-image:linear-gradient(to right,#000 0%,#000 calc(100% - 64px),transparent 100%);
+}

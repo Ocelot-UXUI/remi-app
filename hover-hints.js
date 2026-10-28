@@ -26,7 +26,17 @@
     previousDescription = node.getAttribute('aria-describedby');
     timer = setTimeout(() => {
       if (!node.isConnected || !node.getClientRects().length) { hide(); return; }
-      tip.textContent = node.dataset.tooltip || node.getAttribute('aria-label');
+      tip.classList.toggle('is-card-kind', Boolean(node.dataset.tooltipHeading));
+      tip.replaceChildren();
+      if (node.dataset.tooltipHeading) {
+        const heading = document.createElement('strong');
+        heading.textContent = node.dataset.tooltipHeading;
+        const description = document.createElement('span');
+        description.textContent = node.dataset.tooltip;
+        tip.append(heading, description);
+      } else {
+        tip.textContent = node.dataset.tooltip || node.getAttribute('aria-label');
+      }
       tip.hidden = false;
       tip.classList.remove('is-below');
       const r = node.getBoundingClientRect(), t = tip.getBoundingClientRect();

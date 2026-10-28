@@ -4,3 +4,7 @@
 .remi-tooltip::after{content:"";position:absolute;left:var(--tip-x,50%);bottom:-5px;width:10px;height:10px;transform:translateX(-50%) rotate(45deg);background:#2c2c2c;border-radius:1px}
 .remi-tooltip.is-below::after{top:-5px;bottom:auto}
 @media(prefers-reduced-motion:reduce){.remi-tooltip{transition:none}}
+
+.remi-tooltip.is-card-kind{max-width:244px;padding:11px 14px;text-align:left}
+.remi-tooltip.is-card-kind strong{display:block;font-size:13px;font-weight:600;line-height:20px;margin-bottom:3px}
+.remi-tooltip.is-card-kind span{display:block;color:#ddd;font-size:12px;line-height:19px}

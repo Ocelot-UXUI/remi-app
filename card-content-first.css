@@ -1,0 +1,79 @@
+
+/* Content-first cards: type marks and one quiet conversation action. */
+.refined-card.simplified-card .simple-heading{display:flex;justify-content:flex-end;height:28px;margin:0 0 12px;position:relative}
+.refined-card.simplified-card .simple-heading .simple-kind{position:static;display:flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;color:var(--accent);opacity:.75;pointer-events:auto;z-index:2;border-radius:6px}
+.refined-card.simplified-card .simple-kind>svg{width:28px;height:28px;stroke-width:1.8}
+.refined-card.simplified-card .simple-kind:focus-visible,.home-kind-art:focus-visible{outline:2px solid var(--accent,var(--home-accent));outline-offset:3px}
+.refined-card.simplified-card .refined-quote,.refined-card.simplified-card .refined-insight,.refined-card.simplified-card .refined-body,.refined-card.simplified-card .refined-excerpt,.refined-card.simplified-card .refined-points,.refined-card.simplified-card .simple-tasks,.refined-card.simplified-card .report-contents{margin-top:0}
+.refined-card.simplified-card .simple-tasks .refined-task:first-child,.refined-card.simplified-card .report-contents li:first-child{border-top:0;padding-top:0}
+.card-compact-footer .card-question-area .card-question-button{display:inline-flex;align-items:center;justify-content:center;flex:none;width:32px;height:32px;min-height:32px;padding:0;gap:0;border-radius:8px;color:#8b8197}
+.card-compact-footer .card-question-area .card-question-button:hover,.card-compact-footer .card-question-area .card-question-button:focus-visible{color:#704e95;background:#eee9f4}
+.card-compact-footer .card-question-area .card-question-button>.card-ask-glyph{display:block;width:19px;height:19px}
+.home-insight .home-insight-heading{justify-content:flex-end;min-height:28px;height:28px;margin-bottom:12px}
+.home-insight .home-kind-art{width:28px;height:28px;opacity:.75;transform:none}
+.home-insight .home-kind-art svg{width:28px;height:28px;stroke-width:1.8}
+.home-insight>p,.home-insight ul{min-height:0}
+
+/* Restore context through the title; the type is expressed by its corner mark. */
+.refined-card.simplified-card .simple-heading{align-items:flex-start;justify-content:space-between;gap:14px;height:auto;min-height:28px;margin-bottom:18px}
+.refined-card.simplified-card .simple-title-block{padding:0;min-width:0;flex:1}
+.refined-card.simplified-card .simple-heading h4{margin:0;font-size:17px;line-height:1.55;font-weight:600;color:var(--remi-ink,#312b3b)}
+.refined-card.simplified-card .simple-kind{flex:none}
+.home-insight .home-insight-heading{align-items:flex-start;justify-content:space-between;gap:14px;height:auto;min-height:28px;margin-bottom:18px}
+.home-insight .home-insight-heading h3{flex:1;min-width:0;margin:0;font-size:17px;line-height:1.55;font-weight:600}
+
+/* Category marks dissolve into the tinted corner rather than read as controls. */
+.refined-card.simplified-card .refined-inner{position:relative}
+.refined-card.simplified-card .simple-heading{position:static;min-height:0;margin-bottom:18px}
+.refined-card.simplified-card .simple-title-block{padding-right:31px}
+.refined-card.simplified-card .simple-heading .simple-kind{
+  position:absolute;top:12px;right:12px;width:46px;height:46px;
+  color:var(--accent);opacity:.23;z-index:0;
+}
+.refined-card.simplified-card .simple-kind>svg{width:44px;height:44px;stroke-width:1.65}
+.refined-card.simplified-card .simple-kind:focus-visible{opacity:.5}
+.home-insight{position:relative}
+.home-insight .home-insight-heading{position:static;min-height:0}
+.home-insight .home-insight-heading h3{padding-right:31px}
+.home-insight .home-kind-art{position:absolute;right:14px;top:12px;width:46px;height:46px;color:var(--home-accent);opacity:.23;z-index:0}
+.home-insight .home-kind-art svg{width:44px;height:44px;stroke-width:1.65}
+
+/* Keep the pale category watermark reachable above the title's layout box. */
+.refined-card.simplified-card .simple-heading .simple-kind,.home-insight .home-kind-art{z-index:2;pointer-events:auto;cursor:help}
+
+/* Cards follow their content; each column stacks independently. */
+#board-type-results .refined-card.simplified-card{height:auto;min-height:0;flex:none}
+#board-type-results .refined-card.simplified-card>.refined-inner{display:block;flex:none}
+#board-type-results .refined-card.simplified-card>.card-compact-footer{margin-top:0;padding-top:0}
+#board-type-results .refined-card.simplified-card .card-thread,
+#board-type-results .refined-card.simplified-card .card-conflict{margin-block:0;padding-block:0}
+
+/* Extracted and synthesized passages share one reading treatment. */
+.refined-card.simplified-card .refined-quote,
+.refined-card.simplified-card .refined-insight,
+.refined-card.simplified-card .refined-excerpt{
+  font-size:15px;font-weight:400;font-style:normal;line-height:1.9;
+  letter-spacing:normal;text-align:left;color:var(--remi-body,#575160);
+  padding:0 0 0 14px;border-left:2px solid color-mix(in srgb,var(--accent) 35%,white);
+}
+
+/* Cross-project conflicts: compare the two arrangements, then state the overlap. */
+.refined-card.simplified-card .card-conflict{margin-block:auto;padding-block:8px;color:var(--remi-body,#575160);font-size:15px;line-height:1.8}
+.card-conflict-comparison{display:grid;gap:14px}
+.card-conflict-entry{padding-left:12px;border-left:2px solid #ead4dc}
+.card-conflict-project{display:block;font-size:13px;color:#837982;margin-bottom:2px}
+.card-conflict-entry p{margin:0}
+.card-conflict-summary{margin:18px 0 0;font-size:14px;color:#9a596d;line-height:1.8}
+
+/* Main threads show evidence flowing into a concrete connection. */
+.card-thread{margin-block:auto;padding-block:12px;color:var(--remi-body,#575160);font-size:15px;line-height:1.8;position:relative;z-index:1}
+.card-thread-path{position:relative;padding-left:18px}
+.card-thread-path::before{content:"";position:absolute;left:3px;top:10px;bottom:12px;width:1px;background:#d7e5ed}
+.card-thread-step{position:relative}
+.card-thread-step::before{content:"";position:absolute;left:-18px;top:8px;width:7px;height:7px;background:#aac7d7;border-radius:50%;box-shadow:0 0 0 4px #f6fbfe}
+.card-thread-source{display:block;color:#7b8c98;font-size:13px;line-height:1.6;margin-bottom:5px}
+.card-thread-text{font-size:15px;line-height:1.8}
+.card-thread-bridge{display:block;font-size:12px;color:#98a7b1;margin:9px 0;line-height:1.5}
+.card-thread-conclusion{margin-top:19px;font-size:14px;line-height:1.8;color:#496a7d}
+.card-thread-conclusion>span{display:block;font-size:12px;color:#869aa7;margin-bottom:4px}
+.home-insight .card-thread{margin-block:18px;flex:1;padding-block:0}
