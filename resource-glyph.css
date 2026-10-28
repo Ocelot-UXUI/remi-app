@@ -23,3 +23,12 @@
   -webkit-mask-image:linear-gradient(to right,#000 0%,#000 calc(100% - 64px),transparent 100%);
   mask-image:linear-gradient(to right,#000 0%,#000 calc(100% - 64px),transparent 100%);
 }
+
+/* 最近使用：文件名比来源略突出，但不抢卡片正文的视觉层级。 */
+.remi-workspace .activity-section p.recent-resource-title{font-size:14px!important;line-height:1.45}
+.remi-workspace .activity-section .recent-resource-meta,
+.remi-workspace .activity-section .recent-resource-meta .recent-resource-topic{font-size:13px;line-height:1.45}
+
+/* 图标占足自身宽度，两行文字共用起始线。 */
+.remi-workspace .activity-section .recent-resource,
+.remi-workspace .activity-section .recent-resource.is-only{grid-template-columns:34px minmax(0,1fr) 24px;column-gap:12px}

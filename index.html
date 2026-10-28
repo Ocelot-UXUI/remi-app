@@ -120,7 +120,7 @@
 .remi-workspace .activity-section h3{font-size:12px!important;color:var(--remi-secondary)!important}
 @media(max-width:800px){.remi-workspace .activity-section,.remi-workspace .inspiration-section{padding:18px;border-radius:10px}}
 /* 侧栏统一尺寸，品牌区与菜单使用明确的布局类。 */
-.remi-sidebar{width:244px!important;background:#fff!important;border-right:0!important;transition:width .18s ease}
+.remi-sidebar{width:224px!important;background:#fff!important;border-right:0!important;transition:width .18s ease}
 .remi-brand{height:90px;flex:none;padding:0 24px;display:flex;align-items:center;gap:8px}
 .remi-brand>svg{display:block;width:20px;height:24px;flex:none}
 .remi-brand>span{display:block;font:700 22px/24px -apple-system,"PingFang SC",sans-serif;letter-spacing:-.7px;color:#171717}
@@ -1331,7 +1331,7 @@
 .card-entry-suggestions button:focus-visible{outline:2px solid #a084bf;outline-offset:2px}
 .home-card-suggestions{width:90%;max-width:1280px;margin:0 auto;padding:12px 0}
 </style>
-<link rel="stylesheet" href="topic-workspace.css?v=20261026-capture-actions"><script src="topic-layout.js?v=1"></script><link rel="stylesheet" href="hover-hints.css?v=category-description"><script defer src="hover-hints.js?v=category-description"></script><link rel="stylesheet" href="global-toast.css"><script src="global-toast.js"></script><link rel="stylesheet" href="board-type-tabs.css"><link rel="stylesheet" href="home-workspace.css?v=question-glyphs"><link rel="stylesheet" href="conversation-workspace.css?v=9"><link rel="stylesheet" href="resource-glyph.css?v=resource-family">
+<link rel="stylesheet" href="topic-workspace.css?v=20261026-capture-actions"><script src="topic-layout.js?v=1"></script><link rel="stylesheet" href="hover-hints.css?v=category-description"><script defer src="hover-hints.js?v=category-description"></script><link rel="stylesheet" href="global-toast.css"><script src="global-toast.js"></script><link rel="stylesheet" href="board-type-tabs.css"><link rel="stylesheet" href="home-workspace.css?v=question-glyphs"><link rel="stylesheet" href="conversation-workspace.css?v=9"><link rel="stylesheet" href="resource-glyph.css?v=resource-spacing">
 <link rel="stylesheet" href="card-content-first.css?v=1"></head>
 <body>
   <div id="root"></div>
@@ -2315,9 +2315,9 @@ Remi 是一款面向会议与学习场景的 AI 记录助手，帮助你把录�
         const closeCardChat = () => {captureReadingAnchor();window.speechSynthesis?.cancel();setSpeakingReply('');setFloatingCard(null);};
         useEffect(()=>{
           const grid=boardGridRef.current;if(!grid)return;
-          const observer=new ResizeObserver(entries=>{const width=entries[0].contentRect.width;const n=width>=850?3:width>=530?2:1;setBoardColumns(prev=>{if(prev!==n && !readingAnchor.current)captureReadingAnchor();return n;});});
+          const observer=new ResizeObserver(entries=>{const width=entries[0].contentRect.width;const n=width>=790?3:width>=530?2:1;setBoardColumns(prev=>{if(prev!==n && !readingAnchor.current)captureReadingAnchor();return n;});});
           observer.observe(grid);return ()=>observer.disconnect();
-        },[]);
+        },[viewMode]);
         useEffect(()=>{
           const anchor=readingAnchor.current;if(!anchor)return;
           const frame=requestAnimationFrame(()=>{
