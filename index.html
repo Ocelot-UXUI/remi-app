@@ -1332,7 +1332,7 @@
 .home-card-suggestions{width:90%;max-width:1280px;margin:0 auto;padding:12px 0}
 </style>
 <link rel="stylesheet" href="topic-workspace.css?v=20261026-capture-actions"><script src="topic-layout.js?v=1"></script><link rel="stylesheet" href="hover-hints.css?v=category-description"><script defer src="hover-hints.js?v=category-description"></script><link rel="stylesheet" href="global-toast.css"><script src="global-toast.js"></script><link rel="stylesheet" href="board-type-tabs.css"><link rel="stylesheet" href="home-workspace.css?v=question-glyphs"><link rel="stylesheet" href="conversation-workspace.css?v=9"><link rel="stylesheet" href="resource-glyph.css?v=resource-spacing">
-<link rel="stylesheet" href="card-content-first.css?v=1"></head>
+<link rel="stylesheet" href="card-content-first.css?v=balanced-board-layout"></head>
 <body>
   <div id="root"></div>
 
@@ -2675,7 +2675,7 @@ Remi 是一款面向会议与学习场景的 AI 记录助手，帮助你把录�
         return (
           <div className="remi-workspace flex-1 flex flex-col h-screen overflow-hidden bg-[#fafafa]">
             <div className={`workspace-scroll flex-1 overflow-y-auto p-6 relative flex justify-center ${isRightPanelOpen && rightPanelType === "chat" ? "is-conversation" : ""}`}>
-              <div className="flex w-full transition-all duration-300" style={{ maxWidth: isRightPanelOpen && rightPanelType === 'chat' ? '100%' : '1200px' }}>
+              <div className="board-workspace-content flex w-full transition-all duration-300">
 
                 {/* 左侧主区域 */}
                 <div className="remi-board-main flex-1 min-w-0 transition-all duration-300 flex flex-col" inert={isRightPanelOpen && rightPanelType === "chat" ? "" : undefined} aria-hidden={isRightPanelOpen && rightPanelType === "chat" ? true : undefined}>

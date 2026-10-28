@@ -77,3 +77,16 @@
 .card-thread-conclusion{margin-top:19px;font-size:14px;line-height:1.8;color:#496a7d}
 .card-thread-conclusion>span{display:block;font-size:12px;color:#869aa7;margin-bottom:4px}
 .home-insight .card-thread{margin-block:18px;flex:1;padding-block:0}
+
+/* 看板使用可用宽度，标题与筛选保持紧凑的阅读节奏。 */
+.remi-workspace > .workspace-scroll{padding:20px 32px 48px}
+.board-workspace-content{max-width:none}
+.remi-workspace .inspiration-section{padding:18px 20px 20px}
+.remi-workspace .board-section-heading{align-items:center;margin-bottom:8px}
+.remi-workspace .board-section-heading h3{margin:0}
+.remi-workspace .inspiration-section .board-type-tabs{margin-bottom:16px}
+.remi-workspace .inspiration-section .board-type-tabs button{padding-top:9px;padding-bottom:11px}
+@media(max-width:700px){
+  .remi-workspace > .workspace-scroll{padding-left:16px;padding-right:16px}
+  .remi-workspace .inspiration-section{padding:16px}
+}
