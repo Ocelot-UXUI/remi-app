@@ -169,7 +169,7 @@
 .refined-card.simplified-card .refined-inner{padding-bottom:6px}
 .refined-card.simplified-card .card-compact-footer .card-question-area{margin:0;padding:0}
 .refined-card.simplified-card .card-compact-footer .card-question-button{min-height:28px;height:28px}
-.home-insight .card-topic-heading{margin:18px 58px 8px 20px}
+.home-insight .card-topic-heading{margin:18px 38px 8px 0}
 .home-insight .home-insight-heading{padding-top:0}
 .home-insight .card-compact-footer{margin-top:6px;border-top:0}
 
@@ -177,3 +177,29 @@
 .card-topic-tags{overflow:visible}
 .card-topic-tag:focus:not(:focus-visible){outline:none;box-shadow:none}
 .card-topic-tag:focus-visible{outline:2px solid #9e88b7;outline-offset:2px;border-radius:3px}
+
+/* Keep conversation actions anchored consistently within every card. */
+.refined-card.simplified-card,.home-insight{display:flex;flex-direction:column}
+.refined-card.simplified-card>.card-compact-footer,
+.home-insight>.home-card-footer.card-compact-footer{
+  margin-top:auto;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  flex-shrink:0;
+  padding-top:8px;
+  padding-bottom:16px;
+}
+.refined-card.simplified-card>.card-compact-footer{padding-left:20px;padding-right:20px}
+.home-insight>.home-card-footer.card-compact-footer{padding-left:20px;padding-right:20px}
+.home-insight>.home-card-footer .card-question-area{display:flex;align-items:center;margin:0;padding:0}
+.home-insight>.home-card-footer .card-question-button{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;min-height:28px;padding:0}
+
+
+/* Suggested questions belong to the composer, with an explicit insert cue. */
+.home-hero .home-quick-questions{justify-content:flex-start;align-items:center;gap:6px 10px;margin-top:8px;padding:0 12px}
+.home-quick-label{flex:none;color:#918a99;font-size:12px;line-height:32px;margin-right:2px}
+.home-hero .home-quick-questions button{gap:7px;padding:6px 9px;border-radius:9px;font-size:13px;line-height:20px}
+.home-hero .home-quick-questions .home-question-glyph{width:18px;height:18px}
+.home-hero .home-quick-questions .home-question-insert{width:13px;height:13px;opacity:.55}
+@media(max-width:650px){.home-hero .home-quick-questions{padding:0 3px;gap:4px 6px}.home-quick-label{width:100%;line-height:20px}}
