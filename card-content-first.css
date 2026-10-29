@@ -203,3 +203,80 @@
 .home-hero .home-quick-questions .home-question-glyph{width:18px;height:18px}
 .home-hero .home-quick-questions .home-question-insert{width:13px;height:13px;opacity:.55}
 @media(max-width:650px){.home-hero .home-quick-questions{padding:0 3px;gap:4px 6px}.home-quick-label{width:100%;line-height:20px}}
+
+/* Reader insights use a compact shelf suited to the narrow pane. */
+.topic-workbench .tw-insights.topic-related-insights.remi-workspace{
+  padding:16px 18px 24px;gap:12px;background:#f6f6f8!important;
+  scrollbar-gutter:stable;
+}
+.topic-workbench .tw-insights.topic-related-insights::after{display:none}
+.topic-related-insights .refined-card.simplified-card{
+  --card-title-size:15px;--card-body-size:13px;--card-meta-size:11px;
+  border:1px solid #e9e7ed;border-radius:12px;
+  background:radial-gradient(ellipse 150px 85px at 100% 0%,var(--tint),transparent 100%),#fff;
+  box-shadow:0 2px 4px #24202c03;
+}
+.topic-related-insights .refined-card.simplified-card .refined-inner{padding:16px 16px 4px}
+.topic-related-insights .refined-card.simplified-card .card-topic-heading{margin-bottom:7px}
+.topic-related-insights .card-topic-heading .card-topic-tag{font-size:11px;line-height:18px;min-height:18px}
+.topic-related-insights .refined-card.simplified-card .simple-heading{margin-bottom:12px}
+.topic-related-insights .refined-card.simplified-card .simple-kind{width:26px;height:26px;top:14px;right:14px;opacity:.38!important}
+.topic-related-insights .refined-card.simplified-card .simple-kind svg{width:26px;height:26px}
+.topic-related-insights .refined-card.simplified-card .refined-quote,
+.topic-related-insights .refined-card.simplified-card .refined-insight,
+.topic-related-insights .refined-card.simplified-card .refined-excerpt,
+.topic-related-insights .refined-card.simplified-card .refined-body,
+.topic-related-insights .refined-card.simplified-card .refined-points li,
+.topic-related-insights .refined-card.simplified-card .refined-task-name,
+.topic-related-insights .card-summary-overview,
+.topic-related-insights .card-quote-reflection>p{font-size:13px;line-height:1.75}
+.topic-related-insights .refined-card.simplified-card[data-card-type="golden-quote"] .refined-quote{font-size:14px;line-height:1.8;font-weight:500}
+.topic-related-insights .card-quote-reflection{margin-top:12px;padding-top:10px}
+.topic-related-insights .card-quote-reflection>span{font-size:11px;margin-bottom:4px}
+.topic-related-insights .refined-card.simplified-card .simple-task-meta{font-size:11px;line-height:1.6;margin-top:3px}
+.topic-related-insights .refined-task{padding-block:10px}
+.topic-related-insights .refined-card.simplified-card>.card-compact-footer{padding:4px 12px 10px;min-height:28px}
+.topic-related-insights .card-question-area .card-question-button{border:0;border-radius:7px;padding:0;background:transparent}
+.topic-related-insights .card-report-preview{padding:8px 10px 0;background:#faf9fc}
+.topic-related-insights .refined-card.simplified-card .card-report-preview .report-contents li{font-size:13px;line-height:1.6;padding:9px 0}
+
+/* Topic introduction reads as content, with quiet inline actions. */
+.topic-workbench .tw-overview{padding:0;margin:24px 0 18px;border:0;border-radius:0;background:transparent;box-shadow:none}
+.topic-workbench .tw-overview-label{font-size:12px;color:#817989;margin-bottom:8px;font-weight:400}
+.topic-workbench .tw-overview>p{margin-bottom:10px;color:#514b59;line-height:1.85}
+.topic-workbench .tw-source-chip{padding:4px 0;border:0;border-radius:4px;background:transparent;color:#81728e;gap:7px}
+.topic-workbench .tw-source-chip:hover{background:transparent;color:#674b7f}
+.topic-workbench .tw-suggestions{flex-direction:column;align-items:flex-start;gap:3px;padding:12px 0 16px;border-top:1px solid #eeebf1}
+.topic-workbench .tw-suggestions>button{padding:7px 0;border:0;border-radius:5px;background:transparent;color:#6d5b7e;gap:12px;font-size:13px}
+.topic-workbench .tw-suggestions>button:hover{background:#f2eff6;color:#563d70}
+.topic-workbench .tw-suggestions>button>svg{opacity:.6}
+
+/* Related insights belong to the reading surface rather than nested cards. */
+.topic-workbench .tw-insights.topic-related-insights.remi-workspace{
+  padding:4px 22px 24px;gap:0;background:#fff!important;
+}
+.topic-related-insights .refined-card.simplified-card{
+  border:0;border-radius:0;background:transparent;box-shadow:none;
+  overflow:visible;
+}
+.topic-related-insights .refined-card.simplified-card+.refined-card.simplified-card{border-top:1px solid #efedf2}
+.topic-related-insights .refined-card.simplified-card .refined-inner{padding:22px 0 6px}
+.topic-related-insights .refined-card.simplified-card .simple-kind{top:23px;right:0;opacity:.3!important}
+.topic-related-insights .refined-card.simplified-card>.card-compact-footer{padding:2px 0 16px}
+.topic-related-insights .card-quote-reflection{border-top:0;margin-top:14px;padding-top:0}
+.topic-related-insights .card-report-preview{padding:0;background:transparent;border-radius:0}
+.topic-related-insights .refined-card.simplified-card.is-chat-source{box-shadow:none;background:#faf9fc}
+.topic-related-insights .refined-card.simplified-card:hover{box-shadow:none;border-color:#efedf2}
+
+/* Soft category colour separates insights without a framed card treatment. */
+.topic-workbench .tw-insights.topic-related-insights.remi-workspace{padding:14px 18px 24px;gap:12px;background:#fff!important}
+.topic-related-insights .refined-card.simplified-card{border:0;border-radius:12px;background:linear-gradient(145deg,var(--tint),#fff 88%);box-shadow:none;overflow:visible}
+.topic-related-insights .refined-card.simplified-card+.refined-card.simplified-card{border-top:0}
+.topic-related-insights .refined-card.simplified-card .refined-inner{padding:17px 16px 6px}
+.topic-related-insights .refined-card.simplified-card .simple-kind{top:17px;right:16px}
+.topic-related-insights .refined-card.simplified-card>.card-compact-footer{padding:2px 12px 12px}
+.topic-related-insights .refined-card.simplified-card.is-chat-source{background:linear-gradient(145deg,var(--tint),#fff 88%);box-shadow:none}
+
+/* Recent resources sit on white surfaces against the grey workspace. */
+.remi-workspace .activity-section .recent-resource{background:#fff!important}
+.remi-workspace .activity-section .recent-resource:hover{background:#fff!important}
