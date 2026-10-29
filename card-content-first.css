@@ -57,29 +57,18 @@
   padding:0 0 0 14px;border-left:2px solid color-mix(in srgb,var(--accent) 35%,white);
 }
 
-/* Cross-project conflicts: compare the two arrangements, then state the overlap. */
-.refined-card.simplified-card .card-conflict{margin-block:auto;padding-block:8px;color:var(--remi-body,#575160);font-size:15px;line-height:1.8}
-.card-conflict-comparison{display:grid;gap:14px}
-.card-conflict-entry{padding-left:12px;border-left:2px solid #ead4dc}
-.card-conflict-project{display:block;font-size:13px;color:#837982;margin-bottom:2px}
-.card-conflict-entry p{margin:0}
-.card-conflict-summary{margin:18px 0 0;font-size:14px;color:#9a596d;line-height:1.8}
-
-/* Main threads show evidence flowing into a concrete connection. */
-.card-thread{margin-block:auto;padding-block:12px;color:var(--remi-body,#575160);font-size:15px;line-height:1.8;position:relative;z-index:1}
-.card-thread-path{position:relative;padding-left:18px}
-.card-thread-path::before{content:"";position:absolute;left:3px;top:10px;bottom:12px;width:1px;background:#d7e5ed}
-.card-thread-step{position:relative}
-.card-thread-step::before{content:"";position:absolute;left:-18px;top:8px;width:7px;height:7px;background:#aac7d7;border-radius:50%;box-shadow:0 0 0 4px #f6fbfe}
-.card-thread-source{display:block;color:#7b8c98;font-size:13px;line-height:1.6;margin-bottom:5px}
-.card-thread-text{font-size:15px;line-height:1.8}
-.card-thread-bridge{display:block;font-size:12px;color:#98a7b1;margin:9px 0;line-height:1.5}
-.card-thread-conclusion{margin-top:19px;font-size:14px;line-height:1.8;color:#496a7d}
-.card-thread-conclusion>span{display:block;font-size:12px;color:#869aa7;margin-bottom:4px}
-.home-insight .card-thread{margin-block:18px;flex:1;padding-block:0}
+/* Shared evidence template: two facts, followed by a concise finding. */
+.card-evidence{font-size:15px;line-height:1.8;color:#55515d;position:relative;z-index:1}
+.card-evidence-list{display:grid;gap:16px}
+.card-evidence-source{display:block;margin:0 0 5px;font-size:var(--card-name-size,14px);line-height:1.5;font-weight:600;color:var(--card-name,#49434f)}
+.card-evidence-text{margin:0;font:inherit;color:inherit}
+.card-evidence-conclusion{margin-top:18px;padding-top:14px;border-top:1px solid #e9e6ec}
+.card-evidence-label{display:block;margin:0 0 6px;font-size:var(--card-meta-size,13px);line-height:1.5;font-weight:400;color:var(--card-muted,#77717f)}
+.card-evidence-conclusion p{margin:0;color:var(--card-ink,#302c37);font-size:var(--card-body-size,15px);line-height:1.8;font-weight:500}
+.home-insight .card-evidence{margin-top:0}
 
 /* 看板使用可用宽度，标题与筛选保持紧凑的阅读节奏。 */
-.remi-workspace > .workspace-scroll{padding:20px 32px 48px}
+.remi-workspace > .workspace-scroll{padding:20px 44px 48px}
 .board-workspace-content{max-width:none}
 .remi-workspace .inspiration-section{padding:18px 20px 20px}
 .remi-workspace .board-section-heading{align-items:center;margin-bottom:8px}
@@ -90,3 +79,75 @@
   .remi-workspace > .workspace-scroll{padding-left:16px;padding-right:16px}
   .remi-workspace .inspiration-section{padding:16px}
 }
+
+/* 1440 工作区：侧栏适度收紧，三列卡片各保留至少 300px 阅读宽度。 */
+@media(min-width:1101px) and (max-width:1441px){
+  .remi-sidebar:not(.is-collapsed){width:216px!important}
+}
+
+/* Shared card shell: one title/body/footer rhythm across every type. */
+.refined-card.simplified-card,.home-insight{--card-ink:#302c37;--card-body:#55515d;--card-muted:#77717f;--card-name:#49434f;--card-title-size:17px;--card-body-size:15px;--card-name-size:14px;--card-meta-size:13px}
+.refined-card.simplified-card .refined-inner{padding:20px 20px 18px}
+.refined-card.simplified-card .simple-heading{margin-bottom:18px}
+.refined-card.simplified-card .simple-heading h4,.home-insight .home-insight-heading h3{font-size:17px;line-height:1.55;font-weight:600;color:var(--card-ink)}
+.refined-card.simplified-card .refined-quote,.refined-card.simplified-card .refined-insight,
+.refined-card.simplified-card .refined-excerpt,.refined-card.simplified-card .refined-body,
+.refined-card.simplified-card .refined-points li,.refined-card.simplified-card .refined-task-name,
+.refined-card.simplified-card .report-contents li,.home-insight>p{font-size:15px;line-height:1.8;color:var(--card-body)}
+.refined-card.simplified-card .simple-task-meta{font-size:13px;line-height:1.5;color:var(--card-muted)}
+.refined-card.simplified-card .card-compact-footer{align-items:center;margin-top:0;padding:0 20px 16px}
+.refined-card.simplified-card .refined-points{gap:10px}
+.refined-card.simplified-card .report-number{color:var(--card-muted)}
+
+/* Body variants: an original quote, a digest list, and a report index. */
+.refined-card.simplified-card[data-card-type="golden-quote"] .refined-quote{
+  padding:0;border-left:0;margin:0;font-size:18px;line-height:1.75;font-weight:500;letter-spacing:normal;color:var(--card-ink)
+}
+.refined-card.simplified-card[data-card-type="golden-quote"] .simple-heading{margin-bottom:20px}
+.card-report-preview{position:relative;z-index:1;padding:14px 16px 0;background:#ffffffa8;border-radius:9px}
+.card-report-caption{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-bottom:8px;color:var(--card-muted,#77717f);font-size:13px;line-height:1.5}
+.card-report-caption>span:first-child{color:var(--card-muted,#77717f);font-size:13px;font-weight:400}
+.refined-card.simplified-card .card-report-preview .report-contents{margin:0}
+.refined-card.simplified-card .card-report-preview .report-contents li{padding:12px 0;border-top:1px solid #eeebf2;gap:12px;font-size:15px;line-height:1.8}
+.refined-card.simplified-card .card-report-preview .report-contents li:first-child{padding-top:12px;border-top:1px solid #eeebf2}
+.refined-card.simplified-card .card-report-preview .report-number{font-size:12px;line-height:1.9;font-variant-numeric:tabular-nums}
+
+/* Shared shell, distinct summary and quotation bodies. */
+.card-summary-content,.card-quote-content{position:relative;z-index:1}
+.card-summary-overview{margin:0 0 14px;color:#55515d;font-size:15px;line-height:1.8}
+.refined-card.simplified-card .card-summary-content .refined-points{margin:0;gap:9px}
+.card-quote-reflection{margin-top:18px;padding-top:14px;border-top:1px solid #e9e6ec}
+.card-quote-reflection>span{display:block;margin-bottom:6px;color:var(--card-muted,#77717f);font-size:13px;font-weight:400;line-height:1.5}
+.card-quote-reflection>p{margin:0;color:#55515d;font-size:15px;line-height:1.8;font-weight:400}
+
+/* Compact board controls: keep the heading proportional to the cards. */
+.remi-workspace .inspiration-section{padding-top:14px}
+.remi-workspace .board-section-heading{min-height:32px;margin-bottom:4px!important;gap:16px}
+.remi-workspace .board-section-heading h3{font-size:17px!important;line-height:24px!important;font-weight:600!important}
+.remi-workspace .board-section-heading>button{height:32px;min-height:32px;padding:0 12px!important;gap:6px;font-size:12px!important;line-height:18px;font-weight:500!important;border-radius:16px!important}
+.remi-workspace .board-section-heading>button>svg{width:15px;height:15px}
+.remi-workspace .inspiration-section .board-type-tabs{gap:24px;margin-bottom:14px}
+.remi-workspace .inspiration-section .board-type-tabs button{font-size:13px;line-height:20px;padding-top:7px;padding-bottom:9px}
+
+/* A soft white finish keeps partially visible cards quiet at the viewport edge. */
+.remi-workspace{position:relative}
+.remi-workspace::after{content:"";position:absolute;z-index:15;pointer-events:none;left:0;right:0;bottom:0;height:100px!important;background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,.7) 62%,#fff 100%)!important}
+
+/* Stable reading roles shared by board and home cards. */
+.refined-card.simplified-card .simple-heading h4,.home-insight .home-insight-heading h3{font-size:var(--card-title-size);line-height:1.5}
+.refined-card.simplified-card .refined-task-name{font-weight:500;color:var(--card-name)}
+.refined-card.simplified-card .simple-task-meta{font-weight:400;color:var(--card-muted)}
+.refined-card.simplified-card .card-sources-trigger{font-size:var(--card-meta-size);font-weight:400;color:var(--card-muted);line-height:20px}
+.refined-card.simplified-card .refined-points li:before{background:#aaa0b6}
+
+/* Topic attribution also owns source inspection, avoiding a second footer label. */
+.card-topic-tags{display:flex;align-items:center;gap:6px;min-width:0;padding-right:36px;margin:0 0 12px;position:relative;z-index:3}
+.card-topic-tag{display:block;min-width:0;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0;border-radius:5px;background:#eeedf0;color:#67616e;padding:3px 7px;font:400 12px/18px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;cursor:pointer;transition:background 120ms ease,color 120ms ease}
+.card-topic-tag:hover,.card-topic-tag[aria-expanded=true]{background:#e5e2e9;color:#403948}
+.card-topic-tag:focus-visible{outline:2px solid #9e88b7;outline-offset:2px}
+.card-topic-more{flex:none}
+.card-topic-source-group+.card-topic-source-group{padding-top:8px;margin-top:6px;border-top:1px solid #eeebf2}
+.card-topic-source-group .card-sources-caption{justify-content:space-between;color:#595260;font-size:13px}
+.card-topic-source-group .card-sources-caption>span{font-size:12px;color:#827d88}
+.refined-card.simplified-card .card-compact-footer,.home-insight .card-compact-footer{justify-content:flex-end}
+.home-insight .card-topic-tags{margin-bottom:12px}
